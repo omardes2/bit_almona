@@ -107,8 +107,10 @@
                                 <span class="min-w-0 flex-1">
                                     <span class="block font-bold">{{ $option->label }}</span>
                                     <span class="block text-xs text-gray-500">{{ $option->description }}</span>
+                                    @if ($option->online)
+                                        <span class="mt-1 inline-block rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-700">{{ $option->timingLabel() }}</span>
+                                    @endif
                                 </span>
-                                <span @class(['shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold', 'bg-blue-50 text-blue-700' => $option->online, 'bg-gray-100 text-gray-600' => ! $option->online])>{{ $option->timingLabel() }}</span>
                             </label>
                         @endforeach
                     </div>

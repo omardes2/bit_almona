@@ -64,7 +64,7 @@
                 @endif
             </p>
             @unless ($schedulerRunning)
-                <p class="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-900">يجب إضافة cron على الخادم يشغّل <code dir="ltr">php artisan schedule:run</code> كل دقيقة.</p>
+                <p class="mt-2 rounded-lg bg-amber-50 p-2 text-xs text-amber-900">يجب إضافة cron على الخادم يشغّل <bdi dir="ltr"><code>php artisan schedule:run</code></bdi> كل دقيقة.</p>
             @endunless
         </section>
 
@@ -98,6 +98,6 @@
                 </li>
             @endforeach
         </ul>
-        <p class="border-t border-gray-100 p-3 text-xs text-gray-500">نفس الفحوصات متاحة من سطر الأوامر: <code dir="ltr">php artisan store:check-production</code></p>
+        <p class="border-t border-gray-100 p-3 text-xs text-gray-500">نفس الفحوصات متاحة من سطر الأوامر: <bdi dir="ltr"><code>php artisan store:check-production</code></bdi></p>
     </section>
 </div>

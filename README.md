@@ -31,7 +31,8 @@ php artisan serve
 تُزرع فقط عند `SEED_DEMO_DATA=true` وخارج بيئة الإنتاج (قسم «ألبان وأجبان»، منتج «جبنة الخيرات 24 مثلث»
 بسعر 18 وعرض 10 ₪، وزبون تجريبي `0599000001` / `Demo12345` في البيئة المحلية فقط).
 
-للحذف: `php artisan store:purge-demo`
+للحذف: `php artisan store:purge-demo` (جرّب أولًا `--dry-run`). لا يحذف أي بيانات حقيقية، وما ارتبط بطلبات يُخفى/يُوقف بدل حذفه.
+لا تُزرع في الإنتاج أبدًا دون تأكيد تفاعلي صريح.
 
 ## أوامر مفيدة
 
@@ -41,8 +42,13 @@ php artisan serve
 | `php artisan offers:deactivate-expired` | إيقاف العروض المنتهية (مجدول كل 5 دقائق) |
 | `php artisan carts:prune-guests` | حذف سلال الزوار المهجورة (مجدول يوميًا) |
 | `php artisan store:cleanup` | حذف الرموز المنتهية والإشعارات المقروءة القديمة (مجدول يوميًا) |
+| `php artisan store:check-production` | فحص جاهزية الإنتاج (رمز خروج 1 عند مشكلة حرجة؛ `--json` متاح) |
+| `php artisan system:heartbeat` | نبضة المُجدول (مجدولة كل دقيقة؛ تظهر في `/admin/system`) |
+| `php artisan store:backup-status` | فحص عمر وحجم آخر نسخة احتياطية في `BACKUP_PATH` (قراءة فقط) |
+| `./scripts/deploy.sh [ref]` | النشر على الخادم (انظر `docs/ROLLBACK.md` للتراجع) |
 | `php artisan schedule:work` | تشغيل المجدول محليًا (في الإنتاج: cron لـ `schedule:run`) |
 
 ## التشغيل على الخادم
 
-راجع [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md) (البيئة، الـ Queue، الـ Scheduler، HTTPS، النسخ الاحتياطي).
+راجع [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md) (البيئة، الـ Queue، الـ Scheduler، HTTPS، النسخ الاحتياطي)،
+[docs/STAGING.md](docs/STAGING.md)، [docs/ROLLBACK.md](docs/ROLLBACK.md)، و[docs/PAYMENTS.md](docs/PAYMENTS.md).

@@ -44,4 +44,15 @@
 - Reports: `App\Services\Reports\SalesReport` — revenue = DELIVERED orders by delivered_at; orders value = non-cancelled
   by created_at. CSV via `App\Support\Csv` (BOM + formula-injection escaping). Gates: manage-customers, view-reports
   (super_admin|manager), view-audit-logs (super_admin). Audit values pass through `AuditLog::redact()`.
+- Phase 6: `App\Services\System\SystemHealth` backs `store:check-production` (exit 1 on critical) and `/admin/system`
+  (gate `manage-system` = super_admin, also failed jobs + `/admin/settings/integrations`, status only — never secrets).
+  Scheduler heartbeat: `system:heartbeat` every minute (cache key). Log channels use the `RedactSensitiveData` tap.
+- Settings/storefront cache reads go through `Cache::memo()` (one round trip per request) — keep it that way.
+- OTP UIs: `/forgot-password`, `/account/verify-phone`, `/account/phone`; verified state lives in the session, never
+  in the browser. They show "غير مفعلة" until `OTP_DRIVER` is a real sender. Tests use `Tests\Support\FakesOtp`.
+  Password reset/phone change revoke sessions via `Actions\Auth\RevokeUserSessions`. OTP reset is customers only.
+- Payments: `config/payments.php` `methods.*` (enabled + provider class). New orders use `PaymentManager::provider()`,
+  existing payments `providerForExisting()`. Online providers redirect via `redirectUrl()` (https only). No webhook route yet.
+- Staging: robots.txt `Disallow: /` + `X-Robots-Tag` when APP_ENV=staging. Docs: STAGING, ROLLBACK, PAYMENTS.
+- Never leave `php artisan optimize`/`config:cache` in the working tree: tests would then use the cached config.
 - Production steps live in docs/PRODUCTION_CHECKLIST.md.

@@ -40,7 +40,7 @@ class SystemStatus extends Component
                 'المنطقة الزمنية' => (string) config('app.timezone'),
             ],
             'checks' => $checks,
-            'launch' => $health->launchChecklist(),
+            'launch' => $health->launchChecklist($checks->all()),
             'criticalCount' => $checks->filter(fn (CheckResult $c) => $c->isCritical())->count(),
             'warningCount' => $checks->where('status', CheckResult::WARNING)->count(),
             'queue' => $health->queueStats(),

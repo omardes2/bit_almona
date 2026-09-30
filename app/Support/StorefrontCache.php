@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Cache;
  * calls flush(), so updates appear immediately. The TTL is only a safety net.
  *
  * Only plain arrays are cached (the cache store does not unserialize
- * objects); models are re-hydrated on read.
+ * objects); models are re-hydrated on read. Reads are memoized per
+ * request/job (Cache::memo) so repeated calls cost one cache round trip.
  */
 final class StorefrontCache
 {
@@ -32,7 +33,7 @@ final class StorefrontCache
      */
     public static function categoryTree(): Collection
     {
-        $rows = Cache::remember(self::CATEGORIES, self::TTL, fn () => Category::query()
+        $rows = Cache::memo()->remember(self::CATEGORIES, self::TTL, fn () => Category::query()
             ->active()
             ->ordered()
             ->get(['id', 'parent_id', 'name', 'slug', 'image', 'sort_order', 'is_active'])
@@ -57,7 +58,7 @@ final class StorefrontCache
      */
     public static function runningBanners(): Collection
     {
-        $rows = Cache::remember(self::BANNERS, self::TTL, fn () => Banner::query()
+        $rows = Cache::memo()->remember(self::BANNERS, self::TTL, fn () => Banner::query()
             ->where('is_active', true)
             ->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>', now()))
             ->orderBy('sort_order')
@@ -76,14 +77,14 @@ final class StorefrontCache
      */
     public static function visibleCategoryIds(callable $compute): array
     {
-        return Cache::remember(self::VISIBLE_CATEGORIES, self::TTL, $compute);
+        return Cache::memo()->remember(self::VISIBLE_CATEGORIES, self::TTL, $compute);
     }
 
     public static function flush(): void
     {
-        Cache::forget(self::CATEGORIES);
-        Cache::forget(self::BANNERS);
-        Cache::forget(self::VISIBLE_CATEGORIES);
+        Cache::memo()->forget(self::CATEGORIES);
+        Cache::memo()->forget(self::BANNERS);
+        Cache::memo()->forget(self::VISIBLE_CATEGORIES);
         StorefrontVisibility::forget();
     }
 }

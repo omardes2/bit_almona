@@ -29,5 +29,5 @@
     </div>
     <div class="mt-4">{{ $jobs->links('components.admin.pagination') }}</div>
 
-    <p class="mt-4 text-xs text-gray-500">من سطر الأوامر: <code dir="ltr">php artisan queue:failed</code> · <code dir="ltr">php artisan queue:retry all</code> · <code dir="ltr">php artisan queue:forget {uuid}</code></p>
+    <p class="mt-4 text-xs text-gray-500">من سطر الأوامر: <bdi dir="ltr"><code>php artisan queue:failed</code></bdi> · <bdi dir="ltr"><code>php artisan queue:retry all</code></bdi> · <bdi dir="ltr"><code>php artisan queue:forget {uuid}</code></bdi></p>
 </div>

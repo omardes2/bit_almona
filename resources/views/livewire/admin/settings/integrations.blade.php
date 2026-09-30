@@ -10,7 +10,7 @@
 
     <div class="flex items-start gap-2 rounded-2xl bg-blue-50 p-4 text-sm text-blue-900 ring-1 ring-blue-100" role="note">
         <x-icon name="lock" class="size-5" />
-        <p>لأسباب أمنية لا يمكن إدخال مفاتيح أو كلمات مرور المزودات من لوحة التحكم. تُضبط بيانات الربط في ملف <code dir="ltr">.env</code> على الخادم فقط، ولا تُعرض هنا.</p>
+        <p>لأسباب أمنية لا يمكن إدخال مفاتيح أو كلمات مرور المزودات من لوحة التحكم. تُضبط بيانات الربط في ملف <bdi dir="ltr"><code>.env</code></bdi> على الخادم فقط، ولا تُعرض هنا.</p>
     </div>
 
     <ul class="grid gap-3 sm:grid-cols-2">

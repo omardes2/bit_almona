@@ -72,16 +72,17 @@ class SystemHealth
     /**
      * The short "ready to launch" list shown on the admin system page.
      *
+     * @param  list<CheckResult>|null  $checks  already computed checks (avoids running them twice)
      * @return list<CheckResult>
      */
-    public function launchChecklist(): array
+    public function launchChecklist(?array $checks = null): array
     {
         $wanted = [
             'setting_store_name', 'setting_store_logo', 'setting_store_phone', 'setting_store_address',
             'delivery_zone', 'products', 'admin', 'https', 'debug', 'scheduler', 'queue_worker',
         ];
 
-        $byKey = collect($this->checks())->keyBy('key');
+        $byKey = collect($checks ?? $this->checks())->keyBy('key');
 
         return collect($wanted)
             ->map(fn (string $key) => $byKey->get($key) ?? CheckResult::critical($key, $key, 'تعذر الفحص (قاعدة البيانات غير متاحة).'))
@@ -146,8 +147,8 @@ class SystemHealth
     private function https(): CheckResult
     {
         return Str::startsWith((string) config('app.url'), 'https://')
-            ? CheckResult::ok('https', 'رابط الموقع HTTPS', 'APP_URL يستخدم https')
-            : CheckResult::critical('https', 'رابط الموقع HTTPS', 'APP_URL لا يبدأ بـ https://');
+            ? CheckResult::ok('https', 'رابط الموقع HTTPS', 'رابط الموقع يستخدم https.')
+            : CheckResult::critical('https', 'رابط الموقع HTTPS', 'رابط الموقع (APP_URL) لا يستخدم https.');
     }
 
     private function sessionCookie(): CheckResult
@@ -309,7 +310,7 @@ class SystemHealth
         $last = $this->heartbeat->lastRunAt();
 
         return match (true) {
-            $last === null => CheckResult::critical('scheduler', 'المُجدول (cron)', 'لم يعمل أبدًا. أضف cron: * * * * * php artisan schedule:run'),
+            $last === null => CheckResult::critical('scheduler', 'المُجدول (cron)', 'لم يعمل أبدًا. أضف مهمة cron تشغّل schedule:run كل دقيقة.'),
             ! $this->heartbeat->isRunning() => CheckResult::critical('scheduler', 'المُجدول (cron)', 'متوقف؛ آخر تشغيل '.$last->diffForHumans().'.'),
             default => CheckResult::ok('scheduler', 'المُجدول (cron)', 'يعمل؛ آخر تشغيل '.$last->diffForHumans().'.'),
         };

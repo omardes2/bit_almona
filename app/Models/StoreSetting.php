@@ -24,18 +24,20 @@ class StoreSetting extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::forget(self::CACHE_KEY));
-        static::deleted(fn () => Cache::forget(self::CACHE_KEY));
+        static::saved(fn () => Cache::memo()->forget(self::CACHE_KEY));
+        static::deleted(fn () => Cache::memo()->forget(self::CACHE_KEY));
     }
 
     /**
-     * All settings as a [key => typed value] array, cached.
+     * All settings as a [key => typed value] array, cached. Memoized for the
+     * current request/job too, so the many Store::*() calls on one page cost
+     * a single cache read (one DB query with CACHE_STORE=database).
      *
      * @return array<string, mixed>
      */
     public static function allValues(): array
     {
-        return Cache::rememberForever(self::CACHE_KEY, fn () => static::query()
+        return Cache::memo()->rememberForever(self::CACHE_KEY, fn () => static::query()
             ->get()
             ->mapWithKeys(fn (self $setting) => [$setting->key => $setting->type->cast($setting->value)])
             ->all());
