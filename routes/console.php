@@ -7,3 +7,6 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('offers:deactivate-expired')->everyFiveMinutes()->withoutOverlapping();
 
 Schedule::command('carts:prune-guests')->daily();
+
+// Expired one-time codes and old read admin notifications.
+Schedule::command('store:cleanup')->dailyAt('03:30');

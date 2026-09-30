@@ -3,12 +3,14 @@
 namespace App\Actions\Orders;
 
 use App\Enums\OrderStatus;
+use App\Events\Orders\OrderEvent;
 use App\Models\AuditLog;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Payments\PaymentManager;
 use App\Services\Cart\QuantityRules;
+use App\Support\Notifications\StockAlerts;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -39,6 +41,9 @@ class ChangeOrderStatus
 
             AuditLog::record($order, 'status_changed', ['status' => $from->value], ['status' => $status->value]);
 
+            // Dispatched after commit: admin bell (cancellations) + future customer messages.
+            event(OrderEvent::forStatus($status, $order, $by));
+
             return $order;
         });
     }
@@ -57,6 +62,7 @@ class ChangeOrderStatus
                 $stock = QuantityRules::toMilli((string) $product->stock_quantity) + QuantityRules::toMilli((string) $item->quantity);
                 Product::withTrashed()->whereKey($product->id)->update(['stock_quantity' => QuantityRules::fromMilli($stock)]);
                 $product->stock_quantity = QuantityRules::fromMilli($stock);
+                StockAlerts::check($product->id); // re-arms alerts when stock recovers
             }
         }
 

@@ -35,3 +35,13 @@
   until an admin runs `MarkPaymentPaid`; delivery does not mark it paid.
 - Order status changes: `App\Actions\Orders\ChangeOrderStatus` (wraps `Order::transitionTo()`; cancellation restores
   stock once via `orders.stock_restored_at`). Gates: `manage-orders` (all admins), `manage-delivery`, `manage-settings`.
+- Phase 5: order lifecycle events `App\Events\Orders\*` (ShouldDispatchAfterCommit) feed the admin bell
+  (`Notifications\Admin\*`, database channel) and future customer messages (`OrderStatusMessage`, queued; channels
+  from `App\Messaging\MessagingManager` + config/messaging.php — no real provider yet). Stock alerts:
+  `Support\Notifications\StockAlerts::check()` (de-duplicated via products.*_notified_at, sent after commit).
+- OTP: `App\Otp\OtpService` (hashed codes, expiry, attempts, one-time use, throttling, no enumeration); no user flow
+  until an `OtpSender` driver is configured (config/otp.php).
+- Reports: `App\Services\Reports\SalesReport` — revenue = DELIVERED orders by delivered_at; orders value = non-cancelled
+  by created_at. CSV via `App\Support\Csv` (BOM + formula-injection escaping). Gates: manage-customers, view-reports
+  (super_admin|manager), view-audit-logs (super_admin). Audit values pass through `AuditLog::redact()`.
+- Production steps live in docs/PRODUCTION_CHECKLIST.md.

@@ -9,6 +9,7 @@ use App\Services\Media\ImageStorage;
 use App\Services\Pricing\ProductPriceResolver;
 use App\Services\Pricing\ResolvedPrice;
 use App\Support\ArabicText;
+use App\Support\Notifications\StockAlerts;
 use App\Support\StorefrontVisibility;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -65,6 +66,13 @@ class Product extends Model
     {
         static::saving(function (Product $product) {
             $product->search_text = ArabicText::normalize($product->name.' '.$product->sku);
+        });
+
+        // Admin edits of stock or threshold can trigger (or re-arm) stock alerts.
+        static::saved(function (Product $product) {
+            if ($product->wasChanged(['stock_quantity', 'low_stock_threshold']) || $product->wasRecentlyCreated) {
+                StockAlerts::check($product->id);
+            }
         });
     }
 

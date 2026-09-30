@@ -4,6 +4,7 @@ namespace App\Actions\Checkout;
 
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
+use App\Events\Orders\OrderPlaced;
 use App\Models\Address;
 use App\Models\Cart;
 use App\Models\DeliveryZone;
@@ -17,6 +18,7 @@ use App\Services\Cart\QuantityRules;
 use App\Services\Checkout\CheckoutCalculator;
 use App\Services\Checkout\CheckoutException;
 use App\Support\Money;
+use App\Support\Notifications\StockAlerts;
 use App\Support\Store;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Cache;
@@ -161,6 +163,7 @@ class PlaceOrder
                     }
 
                     Product::withTrashed()->whereKey($product->id)->update(['stock_quantity' => QuantityRules::fromMilli($remaining)]);
+                    StockAlerts::check($product->id); // alerts are sent only after commit
                 }
 
                 $provider->createPayment($order);
@@ -175,6 +178,9 @@ class PlaceOrder
 
                 $address->update(['delivery_zone_id' => $zone->id]);
                 $cart->delete();
+
+                // Held until COMMIT (ShouldDispatchAfterCommit); dropped on rollback.
+                OrderPlaced::dispatch($order, $user);
 
                 return $order;
             });

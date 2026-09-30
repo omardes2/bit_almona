@@ -35,6 +35,9 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Never keep these in the session (old input) or in error reports.
+        $exceptions->dontFlash(['password', 'password_confirmation', 'current_password', 'code', 'otp', 'token']);
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

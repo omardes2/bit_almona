@@ -2,10 +2,23 @@
     @include('account.partials.nav', ['active' => 'account'])
 
     <div>
-        <h1 class="text-2xl font-bold">أهلًا {{ $this->user->name }}</h1>
-        <p class="text-sm text-gray-600">رقم الجوال: <span class="ltr-nums">{{ $this->user->phone }}</span></p>
-        <p class="text-xs text-gray-500">رقم الجوال هو رقم الدخول ولا يمكن تغييره حاليًا. للتغيير تواصل مع المتجر.</p>
+        <h1 class="text-2xl font-bold">مرحبًا {{ $this->user->name }}</h1>
+        <p class="text-sm text-gray-600">لديك {{ $ordersCount }} {{ $ordersCount === 1 ? 'طلب' : 'طلبات' }} في {{ \App\Support\Store::name() }}.</p>
     </div>
+
+    @if ($latest = $recentOrders->first())
+        <a href="{{ route('account.orders.show', $latest) }}" wire:navigate class="card block p-4 hover:ring-brand-500">
+            <div class="text-sm text-gray-500">آخر طلب</div>
+            <div class="mt-1 flex items-center justify-between gap-2">
+                <span class="font-bold" dir="ltr">{{ $latest->order_number }}</span>
+                <x-order-status-badge :status="$latest->status" />
+            </div>
+            <div class="mt-1 flex justify-between text-sm text-gray-600">
+                <bdi dir="ltr">{{ $latest->created_at->format('Y-m-d') }}</bdi>
+                <bdi dir="ltr" class="font-bold text-gray-900">{{ \App\Support\Money::format($latest->total) }}</bdi>
+            </div>
+        </a>
+    @endif
 
     <div class="grid gap-3 sm:grid-cols-2">
         <a href="{{ route('account.orders') }}" wire:navigate class="card block p-4 hover:ring-brand-500">
@@ -29,8 +42,10 @@
         <div class="rounded-lg bg-brand-50 p-3 text-sm text-brand-700">{{ session('status') }}</div>
     @endif
 
+    <p class="text-xs text-gray-500">رقم الجوال (<span class="ltr-nums">{{ $this->user->phone }}</span>) هو رقم الدخول ولا يمكن تغييره حاليًا. للتغيير تواصل مع المتجر.</p>
+
     <form wire:submit="updateProfile" class="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
-        <h2 class="font-bold">بياناتي</h2>
+        <h2 id="profile" class="font-bold">بياناتي</h2>
 
         <x-input name="name" label="الاسم الكامل" wire:model="name" required />
 

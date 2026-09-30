@@ -9,10 +9,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'whatsapp', 'notes'])]
+#[Fillable(['user_id', 'whatsapp', 'notes', 'notification_preferences'])]
 class Customer extends Model
 {
     use HasFactory;
+
+    protected function casts(): array
+    {
+        return ['notification_preferences' => 'array'];
+    }
 
     protected function whatsapp(): Attribute
     {

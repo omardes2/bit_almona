@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Enums\AdminRole;
+use App\Events\Orders\OrderEvent;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Models\Banner;
 use App\Models\Category;
@@ -13,6 +14,8 @@ use App\Models\Payment;
 use App\Models\Product;
 use App\Models\StoreSetting;
 use App\Models\User;
+use App\Notifications\Listeners\NotifyAdminsAboutOrders;
+use App\Notifications\Listeners\NotifyCustomerAboutOrder;
 use App\Services\Cart\CartService;
 use App\Services\Media\GdImageProcessor;
 use App\Services\Media\ImageProcessor;
@@ -72,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
             'store_setting' => StoreSetting::class,
             'order' => Order::class,
             'payment' => Payment::class,
+            'user' => User::class,
         ]);
 
         // super_admin + manager manage the catalog; staff only sees the dashboard for now.
@@ -86,14 +90,36 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-orders', fn (User $user) => $user->isActive()
             && $user->hasAdminRole(AdminRole::SuperAdmin, AdminRole::Manager, AdminRole::Staff));
 
+        // Customers and reports: super admin + manager (staff only handle orders).
+        Gate::define('manage-customers', fn (User $user) => $user->isActive()
+            && $user->hasAdminRole(AdminRole::SuperAdmin, AdminRole::Manager));
+
+        Gate::define('view-reports', fn (User $user) => $user->isActive()
+            && $user->hasAdminRole(AdminRole::SuperAdmin, AdminRole::Manager));
+
+        Gate::define('view-audit-logs', fn (User $user) => $user->isActive()
+            && $user->hasAdminRole(AdminRole::SuperAdmin));
+
         // Store identity and minimum order: super admin only.
         Gate::define('manage-settings', fn (User $user) => $user->isActive()
             && $user->hasAdminRole(AdminRole::SuperAdmin));
+
+        // For the future OTP endpoints (the OtpService also limits per phone + purpose).
+        RateLimiter::for('otp', fn (Request $request) => [
+            Limit::perMinute(3)->by('otp-ip:'.$request->ip()),
+            Limit::perHour(20)->by('otp-ip-hour:'.$request->ip()),
+        ]);
 
         RateLimiter::for('checkout', fn (Request $request) => Limit::perMinute(6)->by('checkout:'.($request->user()?->id ?: $request->ip())));
 
         // Re-apply the admin check on every Livewire update request, not only on page load.
         Livewire::addPersistentMiddleware([EnsureUserIsAdmin::class]);
+
+        // Order lifecycle => admin bell + (future) customer WhatsApp/SMS/email.
+        foreach (OrderEvent::all() as $orderEvent) {
+            Event::listen($orderEvent, NotifyAdminsAboutOrders::class);
+            Event::listen($orderEvent, NotifyCustomerAboutOrder::class);
+        }
 
         // Guest cart => customer cart when signing in (or right after registering).
         Event::listen(Login::class, fn (Login $event) => app(CartService::class)->mergeGuestCart(

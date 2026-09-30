@@ -43,7 +43,7 @@
                         <x-icon name="menu" class="size-7" />
                     </button>
                     <a href="{{ route('admin.dashboard') }}" wire:navigate class="font-bold text-brand-700">{{ $storeName }}</a>
-                    <span class="w-11"></span>
+                    <livewire:admin.notifications.notification-bell />
                 </header>
 
                 {{-- Mobile drawer --}}
@@ -75,6 +75,9 @@
                 </div>
 
                 <main class="min-w-0 flex-1 px-3 py-4 sm:px-6 sm:py-6">
+                    <div class="mx-auto mb-2 hidden max-w-6xl justify-end lg:flex">
+                        <livewire:admin.notifications.notification-bell />
+                    </div>
                     <div class="mx-auto max-w-6xl">
                         {{ $slot }}
                     </div>

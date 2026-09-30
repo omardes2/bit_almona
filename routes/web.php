@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Account\OrderController as AccountOrderController;
+use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Store\CategoryController;
 use App\Http\Controllers\Store\HomeController;
@@ -10,20 +11,25 @@ use App\Http\Controllers\Store\SeoController;
 use App\Livewire\Account\Addresses as AccountAddresses;
 use App\Livewire\Account\Dashboard as AccountDashboard;
 use App\Livewire\Account\Orders as AccountOrders;
+use App\Livewire\Admin\AuditLogs\AuditLogIndex;
 use App\Livewire\Admin\Auth\Login as AdminLogin;
 use App\Livewire\Admin\Banners\BannerForm;
 use App\Livewire\Admin\Banners\BannerIndex;
 use App\Livewire\Admin\Categories\CategoryForm;
 use App\Livewire\Admin\Categories\CategoryIndex;
+use App\Livewire\Admin\Customers\CustomerIndex;
+use App\Livewire\Admin\Customers\CustomerShow;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\DeliveryZones\ZoneForm;
 use App\Livewire\Admin\DeliveryZones\ZoneIndex;
+use App\Livewire\Admin\Notifications\NotificationCenter;
 use App\Livewire\Admin\Offers\OfferForm;
 use App\Livewire\Admin\Offers\OfferIndex;
 use App\Livewire\Admin\Orders\OrderIndex;
 use App\Livewire\Admin\Orders\OrderShow;
 use App\Livewire\Admin\Products\ProductForm;
 use App\Livewire\Admin\Products\ProductIndex;
+use App\Livewire\Admin\Reports\ReportsPage;
 use App\Livewire\Admin\Settings\StoreSettingsForm;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
@@ -123,5 +129,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::livewire('/settings', StoreSettingsForm::class)->middleware('can:manage-settings')->name('settings');
+
+        Route::livewire('/notifications', NotificationCenter::class)->name('notifications');
+
+        Route::middleware('can:manage-customers')->group(function () {
+            Route::livewire('/customers', CustomerIndex::class)->name('customers.index');
+            Route::livewire('/customers/{customer}', CustomerShow::class)->name('customers.show');
+        });
+
+        Route::livewire('/reports', ReportsPage::class)->middleware('can:view-reports')->name('reports');
+        Route::livewire('/audit-logs', AuditLogIndex::class)->middleware('can:view-audit-logs')->name('audit-logs');
+
+        // Authorisation per export type happens in the controller.
+        Route::get('/exports/{type}', ExportController::class)
+            ->whereIn('type', ['orders', 'customers', 'products'])
+            ->middleware('throttle:10,1')
+            ->name('exports');
     });
 });

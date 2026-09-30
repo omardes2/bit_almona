@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Offer;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -26,7 +27,8 @@ class Dashboard extends Component
             ->selectRaw('sum(case when status = ? then 1 else 0 end) as available', [ProductStatus::Available->value])
             ->selectRaw('sum(case when status = ? then 1 else 0 end) as unavailable', [ProductStatus::Unavailable->value])
             ->selectRaw('sum(case when status = ? then 1 else 0 end) as hidden', [ProductStatus::Hidden->value])
-            ->selectRaw('sum(case when stock_quantity <= low_stock_threshold then 1 else 0 end) as low_stock')
+            ->selectRaw('sum(case when stock_quantity <= low_stock_threshold and stock_quantity > 0 then 1 else 0 end) as low_stock')
+            ->selectRaw('sum(case when stock_quantity <= 0 then 1 else 0 end) as out_of_stock')
             ->toBase()
             ->first();
 
@@ -60,6 +62,8 @@ class Dashboard extends Component
             'canManageCatalog' => Gate::allows('manage-catalog'),
             'canManageOrders' => Gate::allows('manage-orders'),
             'openByStatus' => $openByStatus,
+            'newCustomersToday' => User::query()->customers()->whereBetween('created_at', [today(), today()->endOfDay()])->count(),
+            'canManageCustomers' => Gate::allows('manage-customers'),
         ]);
     }
 }

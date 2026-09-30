@@ -70,6 +70,7 @@ class Dashboard extends Component
     {
         return view('livewire.account.dashboard', [
             'recentOrders' => $this->user->orders()->latest('id')->limit(3)->get(),
+            'ordersCount' => $this->user->orders()->count(),
             'defaultAddress' => $this->user->addresses()->where('is_default', true)->first(),
         ]);
     }

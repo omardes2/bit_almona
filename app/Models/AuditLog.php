@@ -36,11 +36,31 @@ class AuditLog extends Model
             'event' => $event,
             'auditable_type' => $model->getMorphClass(),
             'auditable_id' => $model->getKey(),
-            'old_values' => $old ?: null,
-            'new_values' => $new ?: null,
+            'old_values' => $old ? self::redact($old) : null,
+            'new_values' => $new ? self::redact($new) : null,
             'ip_address' => $request?->ip(),
             'user_agent' => $request ? mb_substr((string) $request->userAgent(), 0, 255) : null,
         ]);
+    }
+
+    /** Keys never shown (or stored) in clear text. */
+    public const SENSITIVE = '/(password|token|secret|api[_-]?key|otp|code_hash|remember|session|card|cvv)/i';
+
+    /**
+     * @param  array<string, mixed>|null  $values
+     * @return array<string, mixed>
+     */
+    public static function redact(?array $values): array
+    {
+        $clean = [];
+
+        foreach ($values ?? [] as $key => $value) {
+            $clean[$key] = preg_match(self::SENSITIVE, (string) $key)
+                ? '••••••'
+                : (is_array($value) ? self::redact($value) : $value);
+        }
+
+        return $clean;
     }
 
     public function user(): BelongsTo

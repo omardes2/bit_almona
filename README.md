@@ -21,6 +21,7 @@ php artisan serve
 - الإدارة: `/admin/login` و `/admin`
   - المنتجات `/admin/products` · الأقسام `/admin/categories` · العروض `/admin/offers` · البنرات `/admin/banners`
   - الطلبات `/admin/orders` · مناطق التوصيل `/admin/delivery-zones` · الإعدادات `/admin/settings`
+  - العملاء `/admin/customers` · التقارير `/admin/reports` · الإشعارات `/admin/notifications` · سجل العمليات `/admin/audit-logs`
   - الصلاحيات: `super_admin` كل شيء · `manager` الكتالوج ومناطق التوصيل والطلبات · `staff` الطلبات فقط.
 - المدير الأول يُنشأ من `SEED_ADMIN_PHONE` و `SEED_ADMIN_PASSWORD` في `.env`، أو عبر:
   `php artisan store:create-admin`
@@ -39,4 +40,9 @@ php artisan serve
 | `php artisan test` | تشغيل الاختبارات |
 | `php artisan offers:deactivate-expired` | إيقاف العروض المنتهية (مجدول كل 5 دقائق) |
 | `php artisan carts:prune-guests` | حذف سلال الزوار المهجورة (مجدول يوميًا) |
+| `php artisan store:cleanup` | حذف الرموز المنتهية والإشعارات المقروءة القديمة (مجدول يوميًا) |
 | `php artisan schedule:work` | تشغيل المجدول محليًا (في الإنتاج: cron لـ `schedule:run`) |
+
+## التشغيل على الخادم
+
+راجع [docs/PRODUCTION_CHECKLIST.md](docs/PRODUCTION_CHECKLIST.md) (البيئة، الـ Queue، الـ Scheduler، HTTPS، النسخ الاحتياطي).
