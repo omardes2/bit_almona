@@ -1,0 +1,31 @@
+@import 'tailwindcss';
+@import '@fontsource/tajawal/arabic-400.css';
+@import '@fontsource/tajawal/arabic-500.css';
+@import '@fontsource/tajawal/arabic-700.css';
+@import '@fontsource/tajawal/latin-400.css';
+@import '@fontsource/tajawal/latin-700.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+@theme {
+    --font-sans: 'Tajawal', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* ألوان هوية بيت المونة (قابلة للتعديل لاحقًا) */
+    --color-brand-50: #f2f8f3;
+    --color-brand-100: #dfeee2;
+    --color-brand-500: #2f8f4e;
+    --color-brand-600: #25743f;
+    --color-brand-700: #1e5d33;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+/* Phone numbers and prices are always rendered left-to-right inside RTL text. */
+.ltr-nums {
+    direction: ltr;
+    unicode-bidi: embed;
+}
