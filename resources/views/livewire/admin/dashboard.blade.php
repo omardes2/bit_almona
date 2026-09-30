@@ -10,9 +10,13 @@
     </x-admin.page-header>
 
     @php
+        $ordersUrl = fn ($status = null) => $canManageOrders ? route('admin.orders.index', array_filter(['status' => $status])) : null;
         $cards = [
-            ['label' => 'طلبات اليوم', 'value' => number_format($ordersToday), 'color' => 'text-gray-900'],
+            ['label' => 'طلبات اليوم', 'value' => number_format($ordersToday), 'color' => 'text-gray-900', 'url' => $ordersUrl()],
             ['label' => 'مبيعات اليوم', 'value' => \App\Support\Money::format($salesToday), 'color' => 'text-brand-700'],
+            ['label' => 'طلبات جديدة', 'value' => number_format((int) ($openByStatus['new'] ?? 0)), 'color' => 'text-blue-700', 'url' => $ordersUrl('new')],
+            ['label' => 'قيد التجهيز', 'value' => number_format((int) ($openByStatus['preparing'] ?? 0)), 'color' => 'text-amber-700', 'url' => $ordersUrl('preparing')],
+            ['label' => 'خرجت للتوصيل', 'value' => number_format((int) ($openByStatus['out_for_delivery'] ?? 0)), 'color' => 'text-purple-700', 'url' => $ordersUrl('out_for_delivery')],
             ['label' => 'كل المنتجات', 'value' => number_format((int) $products->total), 'color' => 'text-gray-900', 'url' => $canManageCatalog ? route('admin.products.index') : null],
             ['label' => 'منتجات متاحة', 'value' => number_format((int) $products->available), 'color' => 'text-green-700', 'url' => $canManageCatalog ? route('admin.products.index', ['status' => 'available']) : null],
             ['label' => 'غير متاحة', 'value' => number_format((int) $products->unavailable), 'color' => 'text-amber-700', 'url' => $canManageCatalog ? route('admin.products.index', ['status' => 'unavailable']) : null],

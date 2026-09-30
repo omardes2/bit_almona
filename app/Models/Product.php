@@ -9,6 +9,7 @@ use App\Services\Media\ImageStorage;
 use App\Services\Pricing\ProductPriceResolver;
 use App\Services\Pricing\ResolvedPrice;
 use App\Support\ArabicText;
+use App\Support\StorefrontVisibility;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -103,12 +104,13 @@ class Product extends Model
 
     /**
      * Products a customer may see: not hidden, not soft deleted (global
-     * scope), and in an active category.
+     * scope), and in a category whose whole parent chain is active.
+     * See App\Support\StorefrontVisibility.
      */
     public function scopeStorefront(Builder $query): void
     {
         $query->where($query->qualifyColumn('status'), '!=', ProductStatus::Hidden)
-            ->whereHas('category', fn (Builder $q) => $q->where('is_active', true));
+            ->whereIn($query->qualifyColumn('category_id'), StorefrontVisibility::categoryIds());
     }
 
     /** Available products first, then unavailable ones (hidden never reach here). */
@@ -174,9 +176,7 @@ class Product extends Model
 
     public function isVisibleInStore(): bool
     {
-        return ! $this->trashed()
-            && $this->status !== ProductStatus::Hidden
-            && $this->category?->is_active === true;
+        return StorefrontVisibility::isProductVisible($this);
     }
 
     public function isLowStock(): bool

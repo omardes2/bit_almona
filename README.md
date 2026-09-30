@@ -17,10 +17,11 @@ php artisan serve
 ```
 
 - المتجر: `/` · `/category/{slug}` · `/product/{slug}` · `/offers` · `/search` · `/cart` · `/sitemap.xml` · `/robots.txt`
-- الزبائن: `/login` و `/register` و `/account`
+- الزبائن: `/login` و `/register` و `/account` · `/account/orders` · `/account/addresses` · `/checkout`
 - الإدارة: `/admin/login` و `/admin`
   - المنتجات `/admin/products` · الأقسام `/admin/categories` · العروض `/admin/offers` · البنرات `/admin/banners`
-  - الصلاحيات: `super_admin` و `manager` يديران الكتالوج، و `staff` يرى الرئيسية فقط حاليًا.
+  - الطلبات `/admin/orders` · مناطق التوصيل `/admin/delivery-zones` · الإعدادات `/admin/settings`
+  - الصلاحيات: `super_admin` كل شيء · `manager` الكتالوج ومناطق التوصيل والطلبات · `staff` الطلبات فقط.
 - المدير الأول يُنشأ من `SEED_ADMIN_PHONE` و `SEED_ADMIN_PASSWORD` في `.env`، أو عبر:
   `php artisan store:create-admin`
 

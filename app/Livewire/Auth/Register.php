@@ -70,7 +70,14 @@ class Register extends Component
         Auth::login($user);
         session()->regenerate();
 
-        $this->redirectRoute('account', navigate: true);
+        // Back to checkout (or wherever the customer was going) with the merged cart.
+        $this->redirectIntended(route('account'), navigate: true);
+    }
+
+    /** True when the customer was sent here from checkout (their cart is kept). */
+    public function fromCheckout(): bool
+    {
+        return str_contains((string) session('url.intended'), '/checkout');
     }
 
     public function render()

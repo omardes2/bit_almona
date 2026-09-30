@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Support\Money;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -144,7 +145,12 @@ class CartService
      * All lines with their current server-side price. Lines that can no
      * longer be bought stay visible (with a reason) but are not counted.
      */
-    public function summary(?Cart $cart = null): CartSummary
+    /**
+     * @param  Collection<int, Product>|null  $lockedProducts  products already read with
+     *                                                         SELECT ... FOR UPDATE (checkout), keyed by id;
+     *                                                         used instead of a fresh (possibly stale) read.
+     */
+    public function summary(?Cart $cart = null, ?Collection $lockedProducts = null): CartSummary
     {
         $cart ??= $this->current();
 
@@ -152,7 +158,14 @@ class CartService
             return CartSummary::empty();
         }
 
-        $items = $cart->items()->with(['product.category:id,is_active', 'product.activeOffer'])->get();
+        if ($lockedProducts !== null) {
+            $lockedProducts->load('activeOffer');
+            $items = $cart->items()->lockForUpdate()->get()
+                ->each(fn (CartItem $item) => $item->setRelation('product', $lockedProducts->get($item->product_id)))
+                ->filter(fn (CartItem $item) => $item->product !== null);
+        } else {
+            $items = $cart->items()->with(['product.activeOffer'])->get();
+        }
         $lines = [];
         $subtotal = 0;
 
@@ -244,7 +257,7 @@ class CartService
             $userCart = Cart::firstOrCreate(['user_id' => $user->id]);
             $existing = $userCart->items()->get()->keyBy('product_id');
 
-            foreach ($guestCart->items()->with(['product.category:id,is_active', 'product.activeOffer'])->get() as $guestItem) {
+            foreach ($guestCart->items()->with(['product.activeOffer'])->get() as $guestItem) {
                 $product = $guestItem->product;
 
                 if (! $this->isBuyable($product)) {

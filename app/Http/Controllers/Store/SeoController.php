@@ -11,7 +11,7 @@ class SeoController extends Controller
 {
     public function sitemap(): Response
     {
-        $categories = Category::query()->active()->ordered()->get(['id', 'slug', 'updated_at']);
+        $categories = Category::query()->storefront()->ordered()->get(['id', 'slug', 'updated_at']);
 
         $products = Product::query()
             ->storefront()

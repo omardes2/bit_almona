@@ -37,6 +37,13 @@ class Dashboard extends Component
             ->toBase()
             ->first();
 
+        // Open orders by status, in one grouped query.
+        $openByStatus = Order::query()
+            ->whereIn('status', [OrderStatus::New, OrderStatus::Confirmed, OrderStatus::Preparing, OrderStatus::OutForDelivery])
+            ->selectRaw('status, count(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
         return view('livewire.admin.dashboard', [
             'products' => $products,
             'categoriesCount' => Category::count(),
@@ -51,6 +58,8 @@ class Dashboard extends Component
                 ->limit(6)
                 ->get(['id', 'name', 'sku', 'main_image', 'stock_quantity', 'low_stock_threshold', 'unit']),
             'canManageCatalog' => Gate::allows('manage-catalog'),
+            'canManageOrders' => Gate::allows('manage-orders'),
+            'openByStatus' => $openByStatus,
         ]);
     }
 }

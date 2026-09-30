@@ -18,7 +18,10 @@
                 {{-- Desktop sidebar --}}
                 <aside class="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-e border-gray-200 bg-white lg:flex">
                     <div class="flex h-16 items-center border-b border-gray-100 px-5">
-                        <a href="{{ route('admin.dashboard') }}" wire:navigate class="text-lg font-bold text-brand-700">{{ $storeName }}</a>
+                        <a href="{{ route('admin.dashboard') }}" wire:navigate class="flex items-center gap-2 text-lg font-bold text-brand-700">
+                            @if ($adminLogo = \App\Support\Store::logoUrl())<img src="{{ $adminLogo }}" alt="" width="32" height="32" class="size-8 object-contain">@endif
+                            {{ $storeName }}
+                        </a>
                     </div>
                     <div class="flex-1 overflow-y-auto p-3">
                         <x-admin.nav />

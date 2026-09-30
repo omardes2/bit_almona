@@ -15,11 +15,36 @@ enum OrderStatus: string
     {
         return match ($this) {
             self::New => 'جديد',
-            self::Confirmed => 'مؤكد',
+            self::Confirmed => 'تم التأكيد',
             self::Preparing => 'قيد التجهيز',
             self::OutForDelivery => 'خرج للتوصيل',
-            self::Delivered => 'تم التوصيل',
+            self::Delivered => 'تم التسليم',
             self::Cancelled => 'ملغي',
+        };
+    }
+
+    public function badgeClasses(): string
+    {
+        return match ($this) {
+            self::New => 'bg-blue-100 text-blue-800',
+            self::Confirmed => 'bg-indigo-100 text-indigo-800',
+            self::Preparing => 'bg-amber-100 text-amber-800',
+            self::OutForDelivery => 'bg-purple-100 text-purple-800',
+            self::Delivered => 'bg-green-100 text-green-800',
+            self::Cancelled => 'bg-red-100 text-red-700',
+        };
+    }
+
+    /** Button label for moving an order INTO this status (admin). */
+    public function actionLabel(): string
+    {
+        return match ($this) {
+            self::New => 'إعادة كجديد',
+            self::Confirmed => 'تأكيد الطلب',
+            self::Preparing => 'بدء التجهيز',
+            self::OutForDelivery => 'خرج للتوصيل',
+            self::Delivered => 'تم التسليم',
+            self::Cancelled => 'إلغاء الطلب',
         };
     }
 

@@ -2,6 +2,13 @@
     <h1 class="mb-1 text-2xl font-bold">إنشاء حساب جديد</h1>
     <p class="mb-6 text-sm text-gray-600">سجّل مرة واحدة واطلب مونة بيتك بسهولة.</p>
 
+    @if ($this->fromCheckout())
+        <div class="mb-4 flex items-start gap-2 rounded-xl bg-brand-50 p-3 text-sm text-brand-700 ring-1 ring-brand-100" role="status">
+            <x-icon name="cart" class="size-5 shrink-0" />
+            <span>سجّل الدخول أو أنشئ حسابًا لإتمام طلبك. سلتك محفوظة وستعود مباشرة لإتمام الطلب.</span>
+        </div>
+    @endif
+
     <form wire:submit="register" class="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
         <x-input name="name" label="الاسم الكامل" autocomplete="name" wire:model="name" required autofocus />
 

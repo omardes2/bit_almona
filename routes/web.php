@@ -1,25 +1,34 @@
 <?php
 
+use App\Http\Controllers\Account\OrderController as AccountOrderController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Store\CategoryController;
 use App\Http\Controllers\Store\HomeController;
 use App\Http\Controllers\Store\OffersController;
 use App\Http\Controllers\Store\ProductController;
 use App\Http\Controllers\Store\SeoController;
+use App\Livewire\Account\Addresses as AccountAddresses;
 use App\Livewire\Account\Dashboard as AccountDashboard;
+use App\Livewire\Account\Orders as AccountOrders;
 use App\Livewire\Admin\Auth\Login as AdminLogin;
 use App\Livewire\Admin\Banners\BannerForm;
 use App\Livewire\Admin\Banners\BannerIndex;
 use App\Livewire\Admin\Categories\CategoryForm;
 use App\Livewire\Admin\Categories\CategoryIndex;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
+use App\Livewire\Admin\DeliveryZones\ZoneForm;
+use App\Livewire\Admin\DeliveryZones\ZoneIndex;
 use App\Livewire\Admin\Offers\OfferForm;
 use App\Livewire\Admin\Offers\OfferIndex;
+use App\Livewire\Admin\Orders\OrderIndex;
+use App\Livewire\Admin\Orders\OrderShow;
 use App\Livewire\Admin\Products\ProductForm;
 use App\Livewire\Admin\Products\ProductIndex;
+use App\Livewire\Admin\Settings\StoreSettingsForm;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Store\CartPage;
+use App\Livewire\Store\Checkout;
 use App\Livewire\Store\SearchPage;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +69,13 @@ Route::post('/logout', LogoutController::class)->middleware('auth')->name('logou
 
 Route::middleware(['auth', 'customer'])->group(function () {
     Route::livewire('/account', AccountDashboard::class)->name('account');
+    Route::livewire('/account/addresses', AccountAddresses::class)->name('account.addresses');
+    Route::livewire('/account/orders', AccountOrders::class)->name('account.orders');
+    Route::get('/account/orders/{order}', [AccountOrderController::class, 'show'])->name('account.orders.show');
+
+    // Checkout (customers only; guests are sent to login and brought back here).
+    Route::livewire('/checkout', Checkout::class)->name('checkout');
+    Route::get('/order-confirmed/{order}', [AccountOrderController::class, 'confirmed'])->name('order.confirmed');
 });
 
 /*
@@ -94,5 +110,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::livewire('/banners/create', BannerForm::class)->name('banners.create');
             Route::livewire('/banners/{banner}/edit', BannerForm::class)->name('banners.edit');
         });
+
+        Route::middleware('can:manage-orders')->group(function () {
+            Route::livewire('/orders', OrderIndex::class)->name('orders.index');
+            Route::livewire('/orders/{order}', OrderShow::class)->name('orders.show');
+        });
+
+        Route::middleware('can:manage-delivery')->group(function () {
+            Route::livewire('/delivery-zones', ZoneIndex::class)->name('delivery-zones.index');
+            Route::livewire('/delivery-zones/create', ZoneForm::class)->name('delivery-zones.create');
+            Route::livewire('/delivery-zones/{zone}/edit', ZoneForm::class)->name('delivery-zones.edit');
+        });
+
+        Route::livewire('/settings', StoreSettingsForm::class)->middleware('can:manage-settings')->name('settings');
     });
 });

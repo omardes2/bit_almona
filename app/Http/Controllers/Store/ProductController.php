@@ -34,7 +34,7 @@ class ProductController extends Controller
         if ($product->category->parent_id) {
             $categoryIds = array_merge(
                 $categoryIds,
-                Category::query()->active()->where('parent_id', $product->category->parent_id)->pluck('id')->all(),
+                Category::query()->storefront()->where('parent_id', $product->category->parent_id)->pluck('id')->all(),
                 [$product->category->parent_id],
             );
         }

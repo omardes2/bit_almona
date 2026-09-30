@@ -12,4 +12,11 @@ enum PaymentMethod: string
             self::CashOnDelivery => 'الدفع عند الاستلام',
         };
     }
+
+    public function description(): string
+    {
+        return match ($this) {
+            self::CashOnDelivery => 'ادفع نقدًا عند استلام طلبك.',
+        };
+    }
 }

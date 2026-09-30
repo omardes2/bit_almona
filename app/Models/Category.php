@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\Auditable;
 use App\Services\Media\ImageStorage;
 use App\Support\StorefrontCache;
+use App\Support\StorefrontVisibility;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -55,6 +56,12 @@ class Category extends Model
     public function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);
+    }
+
+    /** Categories customers may see: active, with every ancestor active too. */
+    public function scopeStorefront(Builder $query): void
+    {
+        $query->whereIn($query->qualifyColumn('id'), StorefrontVisibility::categoryIds());
     }
 
     public function scopeRoots(Builder $query): void

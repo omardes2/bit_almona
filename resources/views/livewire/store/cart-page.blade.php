@@ -76,10 +76,14 @@
                 <p class="flex items-center gap-2 rounded-xl bg-gray-50 p-3 text-sm text-gray-600">
                     <x-icon name="truck" class="size-5 shrink-0" /> التوصيل يُحسب عند إتمام الطلب
                 </p>
-                <button type="button" disabled class="btn w-full bg-gray-200 text-gray-600" aria-describedby="checkout-soon">
-                    متابعة لإتمام الطلب
-                </button>
-                <p id="checkout-soon" class="text-center text-xs text-gray-500">إتمام الطلب سيتوفر قريبًا.</p>
+                @if ($summary->purchasableCount() > 0)
+                    <a href="{{ route('checkout') }}" class="btn-primary w-full py-3 text-base">متابعة لإتمام الطلب</a>
+                    @guest
+                        <p class="text-center text-xs text-gray-500">ستحتاج لتسجيل الدخول أو إنشاء حساب — سلتك محفوظة.</p>
+                    @endguest
+                @else
+                    <button type="button" disabled class="btn w-full bg-gray-200 text-gray-600">لا توجد منتجات متوفرة لإتمام الطلب</button>
+                @endif
                 <a href="{{ route('home') }}" wire:navigate class="btn-secondary w-full">متابعة التسوق</a>
             </aside>
         </div>

@@ -1,7 +1,28 @@
-<div class="mx-auto max-w-lg space-y-6">
+<div class="mx-auto max-w-2xl space-y-6">
+    @include('account.partials.nav', ['active' => 'account'])
+
     <div>
         <h1 class="text-2xl font-bold">أهلًا {{ $this->user->name }}</h1>
         <p class="text-sm text-gray-600">رقم الجوال: <span class="ltr-nums">{{ $this->user->phone }}</span></p>
+        <p class="text-xs text-gray-500">رقم الجوال هو رقم الدخول ولا يمكن تغييره حاليًا. للتغيير تواصل مع المتجر.</p>
+    </div>
+
+    <div class="grid gap-3 sm:grid-cols-2">
+        <a href="{{ route('account.orders') }}" wire:navigate class="card block p-4 hover:ring-brand-500">
+            <div class="flex items-center gap-2 font-bold"><x-icon name="orders" /> طلباتي</div>
+            @forelse ($recentOrders as $order)
+                <div class="mt-2 flex items-center justify-between text-sm">
+                    <span dir="ltr">{{ $order->order_number }}</span>
+                    <x-order-status-badge :status="$order->status" />
+                </div>
+            @empty
+                <p class="mt-1 text-sm text-gray-500">لا توجد طلبات بعد.</p>
+            @endforelse
+        </a>
+        <a href="{{ route('account.addresses') }}" wire:navigate class="card block p-4 hover:ring-brand-500">
+            <div class="flex items-center gap-2 font-bold"><x-icon name="zones" /> عناويني</div>
+            <p class="mt-1 text-sm text-gray-600">{{ $defaultAddress?->toSingleLine() ?? 'أضف عنوانًا لتسريع الطلب.' }}</p>
+        </a>
     </div>
 
     @if (session('status'))

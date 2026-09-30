@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SettingType;
+use App\Models\Concerns\Auditable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Cache;
 #[Fillable(['key', 'value', 'type', 'group', 'label'])]
 class StoreSetting extends Model
 {
+    use Auditable;
+
     public const CACHE_KEY = 'store_settings.all';
 
     protected function casts(): array

@@ -5,7 +5,6 @@ namespace App\Models\Concerns;
 use App\Models\AuditLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Records created / updated / deleted / restored events in audit_logs.
@@ -79,17 +78,6 @@ trait Auditable
      */
     protected function writeAudit(string $event, array $old, array $new): void
     {
-        $request = app()->runningInConsole() ? null : request();
-
-        AuditLog::create([
-            'user_id' => Auth::id(),
-            'event' => $event,
-            'auditable_type' => $this->getMorphClass(),
-            'auditable_id' => $this->getKey(),
-            'old_values' => $old ?: null,
-            'new_values' => $new ?: null,
-            'ip_address' => $request?->ip(),
-            'user_agent' => $request ? mb_substr((string) $request->userAgent(), 0, 255) : null,
-        ]);
+        AuditLog::record($this, $event, $old, $new);
     }
 }

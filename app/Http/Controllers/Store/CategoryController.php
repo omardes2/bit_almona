@@ -13,12 +13,9 @@ class CategoryController extends Controller
     public function show(Request $request, string $category): View
     {
         $category = Category::query()
-            ->active()
+            ->storefront()
             ->where('slug', $category)
-            ->with([
-                'parent' => fn ($q) => $q->active(),
-                'children' => fn ($q) => $q->active()->ordered(),
-            ])
+            ->with(['parent', 'children' => fn ($q) => $q->active()->ordered()])
             ->firstOrFail();
 
         $sort = array_key_exists($request->query('sort'), Product::STORE_SORTS) ? $request->query('sort') : 'latest';

@@ -24,3 +24,14 @@
   The browser only ever sends a product id + quantity (`add-to-cart` event handled by `Livewire\Store\CartDrawer`).
 - `StorefrontCache` caches plain arrays (the cache refuses to unserialize objects) and is flushed on
   Category/Banner save/delete and on reorder.
+- Visibility: `App\Support\StorefrontVisibility` (category + every ancestor active) backs `Product::storefront()`,
+  `Category::storefront()` and `Product::isVisibleInStore()`. Never check `category.is_active` directly in store code.
+- Checkout (Phase 4): `App\Actions\Checkout\PlaceOrder` is the only way to create an order. It locks cart items and
+  product rows (`lockForUpdate`, id order), validates with `CartService::summary($cart, $lockedProducts)` — never a plain
+  read inside that transaction (MySQL REPEATABLE READ would return stale stock) — and is idempotent per `checkout_token`.
+  Totals come from `App\Services\Checkout\CheckoutCalculator` (subtotal at original prices − discount + zone fee;
+  minimum = max(store, zone)).
+- Payments: `App\Payments\Contracts\PaymentProvider` + `PaymentManager` (config/payments.php). COD stays `pending`
+  until an admin runs `MarkPaymentPaid`; delivery does not mark it paid.
+- Order status changes: `App\Actions\Orders\ChangeOrderStatus` (wraps `Order::transitionTo()`; cancellation restores
+  stock once via `orders.stock_restored_at`). Gates: `manage-orders` (all admins), `manage-delivery`, `manage-settings`.

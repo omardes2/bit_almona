@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'user_id', 'delivery_zone_id', 'label', 'recipient_name', 'recipient_phone',
-    'area', 'street', 'building', 'floor', 'details', 'latitude', 'longitude', 'is_default',
+    'address_line', 'city', 'area', 'notes', 'latitude', 'longitude', 'is_default',
 ])]
 class Address extends Model
 {
@@ -43,12 +43,15 @@ class Address extends Model
      */
     public function toSingleLine(): string
     {
-        return collect([
-            $this->area,
-            $this->street,
-            $this->building ? 'بناية '.$this->building : null,
-            $this->floor ? 'طابق '.$this->floor : null,
-            $this->details,
-        ])->filter()->implode('، ');
+        return collect([$this->city, $this->area, $this->address_line])->filter()->implode('، ');
+    }
+
+    /**
+     * Make this the only default address of its owner.
+     */
+    public function makeDefault(): void
+    {
+        static::query()->where('user_id', $this->user_id)->whereKeyNot($this->id)->update(['is_default' => false]);
+        $this->update(['is_default' => true]);
     }
 }

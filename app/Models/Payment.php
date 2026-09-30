@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['order_id', 'method', 'status', 'amount', 'currency', 'transaction_reference', 'meta', 'paid_at'])]
+#[Fillable(['order_id', 'provider', 'method', 'status', 'amount', 'currency', 'transaction_reference', 'meta', 'paid_at'])]
 class Payment extends Model
 {
     protected function casts(): array

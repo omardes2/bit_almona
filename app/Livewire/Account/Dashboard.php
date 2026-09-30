@@ -11,7 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-#[Layout('layouts.app')]
+#[Layout('layouts.app', ['noindex' => true])]
 #[Title('حسابي')]
 class Dashboard extends Component
 {
@@ -68,6 +68,9 @@ class Dashboard extends Component
 
     public function render()
     {
-        return view('livewire.account.dashboard');
+        return view('livewire.account.dashboard', [
+            'recentOrders' => $this->user->orders()->latest('id')->limit(3)->get(),
+            'defaultAddress' => $this->user->addresses()->where('is_default', true)->first(),
+        ]);
     }
 }

@@ -2,6 +2,13 @@
     <h1 class="mb-1 text-2xl font-bold">تسجيل الدخول</h1>
     <p class="mb-6 text-sm text-gray-600">أدخل رقم جوالك وكلمة المرور.</p>
 
+    @if ($this->fromCheckout())
+        <div class="mb-4 flex items-start gap-2 rounded-xl bg-brand-50 p-3 text-sm text-brand-700 ring-1 ring-brand-100" role="status">
+            <x-icon name="cart" class="size-5 shrink-0" />
+            <span>سجّل الدخول أو أنشئ حسابًا لإتمام طلبك. سلتك محفوظة وستعود مباشرة لإتمام الطلب.</span>
+        </div>
+    @endif
+
     <form wire:submit="login" class="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
         <x-input name="phone" label="رقم الجوال" type="tel" inputmode="tel" autocomplete="tel"
                  placeholder="05XXXXXXXX" class="ltr-nums text-left" wire:model="phone" required autofocus />

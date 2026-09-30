@@ -21,6 +21,8 @@ final class StorefrontCache
 
     private const BANNERS = 'storefront.banners';
 
+    private const VISIBLE_CATEGORIES = 'storefront.visible_category_ids';
+
     private const TTL = 3600;
 
     /**
@@ -68,9 +70,20 @@ final class StorefrontCache
         return Banner::hydrate($rows)->filter(fn (Banner $banner) => $banner->isRunning())->values();
     }
 
+    /**
+     * @param  callable(): list<int>  $compute
+     * @return list<int>
+     */
+    public static function visibleCategoryIds(callable $compute): array
+    {
+        return Cache::remember(self::VISIBLE_CATEGORIES, self::TTL, $compute);
+    }
+
     public static function flush(): void
     {
         Cache::forget(self::CATEGORIES);
         Cache::forget(self::BANNERS);
+        Cache::forget(self::VISIBLE_CATEGORIES);
+        StorefrontVisibility::forget();
     }
 }

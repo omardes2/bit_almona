@@ -38,7 +38,19 @@ class GdImageProcessor implements ImageProcessor
 
         $image = @imagecreatefromstring($contents);
 
-        return $image instanceof GdImage ? $image : null;
+        if (! $image instanceof GdImage) {
+            return null;
+        }
+
+        // Keep transparency (e.g. a PNG logo) when re-encoding.
+        if (! imageistruecolor($image)) {
+            imagepalettetotruecolor($image);
+        }
+
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+
+        return $image;
     }
 
     private function fit(GdImage $image, int $maxSize): GdImage

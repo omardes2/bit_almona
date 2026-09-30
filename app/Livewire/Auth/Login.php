@@ -30,6 +30,12 @@ class Login extends Component
         $this->redirectIntended(route('account'), navigate: true);
     }
 
+    /** True when the customer was sent here from checkout (their cart is kept). */
+    public function fromCheckout(): bool
+    {
+        return str_contains((string) session('url.intended'), '/checkout');
+    }
+
     public function render()
     {
         return view('livewire.auth.login');
