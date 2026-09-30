@@ -27,6 +27,12 @@ class DemoDataSeeder extends Seeder
 
     public function run(RegisterCustomer $registerCustomer): void
     {
+        if (! $this->allowedHere()) {
+            $this->command?->warn('تم تخطي البيانات التجريبية: لا تُضاف في بيئة الإنتاج بدون تأكيد صريح.');
+
+            return;
+        }
+
         $category = Category::firstOrCreate(
             ['slug' => self::CATEGORY_SLUG],
             ['name' => 'ألبان وأجبان', 'sort_order' => 1, 'is_active' => true],
@@ -71,5 +77,19 @@ class DemoDataSeeder extends Seeder
                 'password' => self::CUSTOMER_PASSWORD,
             ]);
         }
+    }
+
+    /**
+     * Never seed demo data in production unless an operator explicitly
+     * confirms it interactively (non-interactive runs, e.g. deploy scripts
+     * with --force, always refuse).
+     */
+    private function allowedHere(): bool
+    {
+        if (! app()->isProduction()) {
+            return true;
+        }
+
+        return (bool) $this->command?->confirm('أنت في بيئة الإنتاج. هل تريد فعلًا إضافة بيانات تجريبية؟', false);
     }
 }

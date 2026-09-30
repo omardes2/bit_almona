@@ -72,7 +72,7 @@ class ChangeOrderStatus
     private function cancelPayment(Order $order): void
     {
         foreach ($order->payments()->get() as $payment) {
-            $this->payments->provider($payment->method)->cancel($payment);
+            $this->payments->providerForExisting($payment->method)->cancel($payment);
         }
     }
 }

@@ -16,15 +16,7 @@ final class PhoneNumber
             return '';
         }
 
-        // Arabic-Indic (٠-٩) and Eastern Arabic-Indic (۰-۹) digits.
-        $phone = strtr($phone, [
-            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
-            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
-            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
-            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
-        ]);
-
-        $digits = preg_replace('/\D+/', '', $phone) ?? '';
+        $digits = preg_replace('/\D+/', '', self::westernDigits($phone)) ?? '';
 
         if (str_starts_with($digits, '00')) {
             $digits = substr($digits, 2);
@@ -41,6 +33,25 @@ final class PhoneNumber
         }
 
         return $digits;
+    }
+
+    /** Arabic-Indic (٠-٩) and Eastern Arabic-Indic (۰-۹) digits => 0-9. */
+    public static function westernDigits(string $value): string
+    {
+        return strtr($value, [
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        ]);
+    }
+
+    /** 0599123456 => 059•••••56 (for "we sent a code to ..." messages). */
+    public static function mask(?string $phone): string
+    {
+        $phone = self::normalize($phone);
+
+        return strlen($phone) < 6 ? '•••' : substr($phone, 0, 3).str_repeat('•', strlen($phone) - 5).substr($phone, -2);
     }
 
     public static function isValid(?string $phone): bool

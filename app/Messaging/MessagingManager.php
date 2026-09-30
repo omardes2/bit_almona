@@ -40,6 +40,12 @@ class MessagingManager
         ));
     }
 
+    /** Channel configured AND the customer has somewhere to receive it. */
+    public function canReach(User $user, string $channel): bool
+    {
+        return $this->isEnabled($channel) && $this->hasAddress($user, $channel);
+    }
+
     private function hasAddress(User $user, string $channel): bool
     {
         return match ($channel) {

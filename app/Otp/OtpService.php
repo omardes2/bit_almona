@@ -103,10 +103,14 @@ class OtpService
 
     private function shouldSend(string $phone, OtpPurpose $purpose): bool
     {
-        $exists = User::query()->where('phone', $phone)->exists();
+        // A phone change needs a number nobody uses (customer or admin).
+        if ($purpose === OtpPurpose::PhoneChange) {
+            return ! User::query()->where('phone', $phone)->exists();
+        }
 
-        // Reset and verification need an existing account; a phone change needs a free number.
-        return $purpose === OtpPurpose::PhoneChange ? ! $exists : $exists;
+        // Reset and verification: only active customer accounts (admins are
+        // recovered by a super admin / store:create-admin, never by SMS).
+        return User::query()->customers()->active()->where('phone', $phone)->exists();
     }
 
     private function throttle(string $phone, OtpPurpose $purpose, ?string $ip): void

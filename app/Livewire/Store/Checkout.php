@@ -7,12 +7,15 @@ use App\Enums\PaymentMethod;
 use App\Livewire\Forms\AddressForm;
 use App\Models\Address;
 use App\Models\DeliveryZone;
+use App\Payments\PaymentException;
 use App\Payments\PaymentManager;
 use App\Services\Cart\CartService;
 use App\Services\Checkout\CheckoutCalculator;
 use App\Services\Checkout\CheckoutException;
 use App\Support\PhoneNumber;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -20,6 +23,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Throwable;
 
 /**
  * One-page checkout. The browser only chooses things (address, zone, notes,
@@ -30,6 +34,8 @@ use Livewire\Component;
 #[Title('إتمام الطلب')]
 class Checkout extends Component
 {
+    public const UNEXPECTED_ERROR = 'حدث خطأ غير متوقع، حاول مرة أخرى';
+
     /** Idempotency key: one checkout page load can create at most one order. */
     #[Locked]
     public string $checkoutToken = '';
@@ -50,14 +56,14 @@ class Checkout extends Component
 
     public string $whatsapp = '';
 
-    public string $paymentMethod = 'cash_on_delivery';
+    public string $paymentMethod = '';
 
     /** @var list<string> */
     public array $problems = [];
 
     public ?string $error = null;
 
-    public function mount(CartService $cart)
+    public function mount(CartService $cart, PaymentManager $payments)
     {
         if ($cart->summary()->purchasableCount() === 0) {
             session()->flash('toast', ['message' => 'سلتك فارغة أو لا تحتوي منتجات متوفرة.', 'type' => 'error']);
@@ -67,6 +73,7 @@ class Checkout extends Component
 
         $user = Auth::user()->loadMissing('customer');
         $this->checkoutToken = Str::random(40);
+        $this->paymentMethod = ($payments->enabledMethods()[0] ?? null)?->value ?? '';
         $this->whatsapp = (string) ($user->customer?->whatsapp ?? $user->phone);
         $this->newAddress->forUser($user);
 
@@ -148,9 +155,34 @@ class Checkout extends Component
             $this->problems = $e->problems;
 
             return null;
+        } catch (PaymentException) {
+            $this->addError('paymentMethod', 'طريقة الدفع المختارة غير متاحة حاليًا.');
+
+            return null;
+        } catch (Throwable $e) {
+            // Nothing was saved (PlaceOrder is one transaction). Log safe context only:
+            // no address, phone, notes or SQL bindings.
+            Log::error('checkout.unexpected_error', [
+                'user_id' => $user->id,
+                'checkout_ref' => substr(hash('sha256', $this->checkoutToken), 0, 12),
+                'zone_id' => (int) $data['zoneId'],
+                'payment_method' => $data['paymentMethod'],
+                'error' => $e::class,
+                'at' => basename($e->getFile()).':'.$e->getLine(),
+                'detail' => $e instanceof QueryException ? 'SQLSTATE '.$e->getCode() : Str::limit($e->getMessage(), 200),
+            ]);
+
+            $this->error = self::UNEXPECTED_ERROR;
+
+            return null;
         }
 
         $this->dispatch('cart-updated', count: $cart->count());
+
+        // Online gateways (future) send the customer to their hosted payment page.
+        if ($paymentUrl = $payments->redirectUrlFor($order)) {
+            return $this->redirect($paymentUrl);
+        }
 
         return $this->redirectRoute('order.confirmed', $order, navigate: true);
     }
@@ -175,7 +207,7 @@ class Checkout extends Component
             'zones' => $zones,
             'quote' => $quote,
             'addresses' => Auth::user()->addresses()->orderByDesc('is_default')->latest('id')->get(),
-            'methods' => $payments->enabledMethods(),
+            'methods' => $payments->checkoutOptions(),
             'user' => Auth::user(),
         ]);
     }

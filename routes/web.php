@@ -6,11 +6,16 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Store\CategoryController;
 use App\Http\Controllers\Store\HomeController;
 use App\Http\Controllers\Store\OffersController;
+use App\Http\Controllers\Store\PageController;
 use App\Http\Controllers\Store\ProductController;
 use App\Http\Controllers\Store\SeoController;
+use App\Http\Middleware\EnsurePhoneIsVerified;
 use App\Livewire\Account\Addresses as AccountAddresses;
+use App\Livewire\Account\ChangePhone;
 use App\Livewire\Account\Dashboard as AccountDashboard;
+use App\Livewire\Account\NotificationPreferences;
 use App\Livewire\Account\Orders as AccountOrders;
+use App\Livewire\Account\VerifyPhone;
 use App\Livewire\Admin\AuditLogs\AuditLogIndex;
 use App\Livewire\Admin\Auth\Login as AdminLogin;
 use App\Livewire\Admin\Banners\BannerForm;
@@ -30,7 +35,11 @@ use App\Livewire\Admin\Orders\OrderShow;
 use App\Livewire\Admin\Products\ProductForm;
 use App\Livewire\Admin\Products\ProductIndex;
 use App\Livewire\Admin\Reports\ReportsPage;
+use App\Livewire\Admin\Settings\Integrations;
 use App\Livewire\Admin\Settings\StoreSettingsForm;
+use App\Livewire\Admin\System\FailedJobs;
+use App\Livewire\Admin\System\SystemStatus;
+use App\Livewire\Auth\ForgotPassword;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
 use App\Livewire\Store\CartPage;
@@ -51,6 +60,11 @@ Route::get('/offers', OffersController::class)->name('offers');
 Route::livewire('/search', SearchPage::class)->name('search');
 Route::livewire('/cart', CartPage::class)->name('cart');
 
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/contact', [PageController::class, 'contact'])->name('contact');
+Route::get('/privacy-policy', [PageController::class, 'privacy'])->name('privacy');
+Route::get('/terms', [PageController::class, 'terms'])->name('terms');
+
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
@@ -63,6 +77,7 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::middleware(['guest', 'throttle:auth'])->group(function () {
     Route::livewire('/login', Login::class)->name('login');
     Route::livewire('/register', Register::class)->name('register');
+    Route::livewire('/forgot-password', ForgotPassword::class)->name('password.forgot');
 });
 
 Route::post('/logout', LogoutController::class)->middleware('auth')->name('logout');
@@ -78,9 +93,13 @@ Route::middleware(['auth', 'customer'])->group(function () {
     Route::livewire('/account/addresses', AccountAddresses::class)->name('account.addresses');
     Route::livewire('/account/orders', AccountOrders::class)->name('account.orders');
     Route::get('/account/orders/{order}', [AccountOrderController::class, 'show'])->name('account.orders.show');
+    Route::livewire('/account/notifications', NotificationPreferences::class)->name('account.notifications');
+    Route::livewire('/account/phone', ChangePhone::class)->name('account.phone');
+    Route::livewire('/account/verify-phone', VerifyPhone::class)->name('account.verify-phone');
 
     // Checkout (customers only; guests are sent to login and brought back here).
-    Route::livewire('/checkout', Checkout::class)->name('checkout');
+    // A verified phone is required only when REQUIRE_PHONE_VERIFICATION=true and an OTP sender exists.
+    Route::livewire('/checkout', Checkout::class)->middleware(EnsurePhoneIsVerified::class)->name('checkout');
     Route::get('/order-confirmed/{order}', [AccountOrderController::class, 'confirmed'])->name('order.confirmed');
 });
 
@@ -129,6 +148,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::livewire('/settings', StoreSettingsForm::class)->middleware('can:manage-settings')->name('settings');
+
+        // System status, failed jobs and integration status: super admin only.
+        Route::middleware('can:manage-system')->group(function () {
+            Route::livewire('/system', SystemStatus::class)->name('system');
+            Route::livewire('/system/failed-jobs', FailedJobs::class)->name('system.failed-jobs');
+            Route::livewire('/settings/integrations', Integrations::class)->name('integrations');
+        });
 
         Route::livewire('/notifications', NotificationCenter::class)->name('notifications');
 

@@ -4,7 +4,7 @@
     $address = \App\Support\Store::address();
 @endphp
 <footer class="border-t border-gray-200 bg-white pb-24 md:pb-0">
-    <div class="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:grid-cols-3">
+    <div class="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:grid-cols-2 lg:grid-cols-4">
         <div>
             <div class="text-lg font-bold text-brand-700">{{ $storeName }}</div>
             @if ($address)
@@ -17,6 +17,15 @@
                 <li><a href="{{ route('offers') }}" wire:navigate class="hover:text-brand-700">العروض</a></li>
                 <li><a href="{{ route('search') }}" wire:navigate class="hover:text-brand-700">البحث</a></li>
                 <li><a href="{{ route('cart') }}" wire:navigate class="hover:text-brand-700">السلة</a></li>
+            </ul>
+        </div>
+        <div>
+            <h2 class="mb-2 text-sm font-bold text-gray-900">المتجر</h2>
+            <ul class="space-y-1.5 text-sm text-gray-600">
+                <li><a href="{{ route('about') }}" wire:navigate class="hover:text-brand-700">من نحن</a></li>
+                <li><a href="{{ route('contact') }}" wire:navigate class="hover:text-brand-700">اتصل بنا</a></li>
+                <li><a href="{{ route('privacy') }}" wire:navigate class="hover:text-brand-700">سياسة الخصوصية</a></li>
+                <li><a href="{{ route('terms') }}" wire:navigate class="hover:text-brand-700">الشروط والأحكام</a></li>
             </ul>
         </div>
         @if ($phone || $whatsappUrl)

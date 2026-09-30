@@ -47,6 +47,17 @@ final class Store
         return self::setting('store_address');
     }
 
+    public static function workingHours(): ?string
+    {
+        return self::setting('working_hours');
+    }
+
+    /** Free text for the "من نحن" page, written by the store owner. */
+    public static function about(): ?string
+    {
+        return self::setting('about_text');
+    }
+
     public static function currencyCode(): string
     {
         return self::setting('currency_code') ?? config('store.currency.code');

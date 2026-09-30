@@ -89,6 +89,12 @@ class User extends Authenticatable
         return $this->status === AccountStatus::Active;
     }
 
+    /** Safe on freshly created models that never loaded the column. */
+    public function hasVerifiedPhone(): bool
+    {
+        return filled($this->attributes['phone_verified_at'] ?? null);
+    }
+
     public function hasAdminRole(AdminRole ...$roles): bool
     {
         return $this->isAdmin()

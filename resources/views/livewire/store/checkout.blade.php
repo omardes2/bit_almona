@@ -94,14 +94,26 @@
             {{-- 4. Notes + payment --}}
             <section class="card space-y-3 p-4" aria-labelledby="step-payment">
                 <h2 id="step-payment" class="flex items-center gap-2 font-bold"><span class="flex size-6 items-center justify-center rounded-full bg-brand-600 text-xs text-white">4</span> الدفع والملاحظات</h2>
-                <div class="grid gap-2" role="radiogroup" aria-label="طريقة الدفع">
-                    @foreach ($methods as $method)
-                        <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-3 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
-                            <input type="radio" name="payment" value="{{ $method->value }}" wire:model="paymentMethod" class="text-brand-600">
-                            <span><span class="block font-bold">{{ $method->label() }}</span><span class="block text-xs text-gray-500">{{ $method->description() }}</span></span>
-                        </label>
-                    @endforeach
-                </div>
+                @if ($methods === [])
+                    <p class="rounded-xl bg-amber-50 p-3 text-sm text-amber-900" role="status">لا توجد طريقة دفع متاحة حاليًا. يرجى التواصل مع المتجر.</p>
+                @else
+                    <div class="grid gap-2" role="radiogroup" aria-label="طريقة الدفع">
+                        @foreach ($methods as $option)
+                            <label wire:key="pay-{{ $option->method->value }}" class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-3 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
+                                <input type="radio" name="payment" value="{{ $option->method->value }}" wire:model="paymentMethod" class="text-brand-600">
+                                @if ($option->icon)
+                                    <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-700"><x-icon :name="$option->icon" class="size-5" /></span>
+                                @endif
+                                <span class="min-w-0 flex-1">
+                                    <span class="block font-bold">{{ $option->label }}</span>
+                                    <span class="block text-xs text-gray-500">{{ $option->description }}</span>
+                                </span>
+                                <span @class(['shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold', 'bg-blue-50 text-blue-700' => $option->online, 'bg-gray-100 text-gray-600' => ! $option->online])>{{ $option->timingLabel() }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
+                @error('paymentMethod') <p class="text-sm text-red-600">{{ $message }}</p> @enderror
                 <x-admin.field label="ملاحظات الطلب (اختياري)" for="notes" error="notes">
                     <textarea id="notes" wire:model="notes" rows="2" maxlength="1000" class="form-input" placeholder="مثال: الرجاء الاتصال قبل الوصول"></textarea>
                 </x-admin.field>
@@ -150,12 +162,12 @@
 
                 <button type="submit"
                         wire:loading.attr="disabled" wire:target="placeOrder"
-                        @disabled($zones->isEmpty() || ($quote->zone && ! $quote->meetsMinimum()))
+                        @disabled($zones->isEmpty() || $methods === [] || ($quote->zone && ! $quote->meetsMinimum()))
                         class="btn-primary w-full py-3.5 text-base">
                     <span wire:loading.remove wire:target="placeOrder">تأكيد الطلب</span>
                     <span wire:loading wire:target="placeOrder">جارٍ تأكيد طلبك...</span>
                 </button>
-                <p class="text-center text-xs text-gray-500">بالضغط على «تأكيد الطلب» يُرسل طلبك للمتجر. الدفع عند الاستلام.</p>
+                <p class="text-center text-xs text-gray-500">بالضغط على «تأكيد الطلب» يُرسل طلبك للمتجر.</p>
             </div>
         </aside>
     </form>

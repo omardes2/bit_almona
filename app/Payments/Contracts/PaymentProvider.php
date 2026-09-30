@@ -17,6 +17,20 @@ interface PaymentProvider
     public function method(): PaymentMethod;
 
     /**
+     * True when the customer pays instantly online (card, wallet...); false
+     * when payment is collected later (cash on delivery).
+     */
+    public function isOnline(): bool;
+
+    /**
+     * Called AFTER the order transaction commits. An online gateway returns
+     * its hosted payment page (https) and the checkout redirects there; the
+     * payment stays pending until the gateway's signed webhook confirms it
+     * (see docs/PAYMENTS.md). Offline methods return null.
+     */
+    public function redirectUrl(Payment $payment): ?string;
+
+    /**
      * Create the payment record for a new order. Called inside the order
      * transaction, so it must not perform slow network calls (a gateway
      * would create a pending record here and redirect afterwards).

@@ -3,6 +3,7 @@
 namespace App\Livewire\Account;
 
 use App\Models\User;
+use App\Otp\OtpService;
 use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
@@ -66,9 +67,10 @@ class Dashboard extends Component
         session()->flash('status', 'تم تغيير كلمة المرور.');
     }
 
-    public function render()
+    public function render(OtpService $otp)
     {
         return view('livewire.account.dashboard', [
+            'otpAvailable' => $otp->isAvailable(),
             'recentOrders' => $this->user->orders()->latest('id')->limit(3)->get(),
             'ordersCount' => $this->user->orders()->count(),
             'defaultAddress' => $this->user->addresses()->where('is_default', true)->first(),

@@ -55,6 +55,13 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     /*
+    | Deployed version shown on the admin system page. Set APP_VERSION in .env
+    | or let scripts/deploy.sh write the commit to the VERSION file (read once
+    | here, so with `config:cache` there is no git call or file read per request).
+    */
+    'version' => env('APP_VERSION') ?: (is_file(base_path('VERSION')) ? trim((string) file_get_contents(base_path('VERSION'))) : 'dev'),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------

@@ -67,6 +67,17 @@ return [
 
     'admin_per_page' => 15,
 
+    /*
+    | Require a verified phone (OTP) before checkout. Only enforced when this
+    | is true AND an OTP sender is configured (config/otp.php); otherwise
+    | customers could never check out.
+    */
+    // Where the server's backup job writes database dumps (never inside public/).
+    // Only read by `php artisan store:backup-status`; this app does not create dumps.
+    'backup_path' => env('BACKUP_PATH'),
+
+    'require_phone_verification' => (bool) env('REQUIRE_PHONE_VERIFICATION', false),
+
     'login' => [
         'max_attempts' => 5,
         'decay_seconds' => 60,

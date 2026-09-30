@@ -23,7 +23,12 @@ php artisan key:generate
 | `LOG_LEVEL` | `warning` |
 | `SESSION_SECURE_COOKIE` | اتركه فارغًا (يصبح `true` تلقائيًا في الإنتاج) |
 | `SEED_ADMIN_*`, `SEED_DEMO_DATA` | فارغة / `false` |
-| `WHATSAPP_PROVIDER`, `SMS_PROVIDER`, `OTP_DRIVER` | فارغة حتى يتم ربط مزود حقيقي |
+| `WHATSAPP_PROVIDER`, `SMS_PROVIDER`, `OTP_DRIVER` | فارغة حتى يتم ربط مزود حقيقي (قيمة `log` للتطوير فقط ويرفضها الفحص) |
+| `REQUIRE_PHONE_VERIFICATION` | `false` (لا يُطبّق إلا مع مزود OTP حقيقي) |
+| `SESSION_DRIVER` | `database` (مطلوب لإلغاء الجلسات عند استعادة كلمة المرور أو تغيير الجوال) |
+| `QUEUE_CONNECTION` | `database` مع عامل طوابير |
+| `APP_VERSION` | اختياري؛ `deploy.sh` يكتب رقم الـ commit في ملف `VERSION` |
+| `BACKUP_PATH` | مجلد النسخ الاحتياطية خارج `public/` |
 
 - اجعل صلاحيات الملف: `chmod 640 .env` ولا تنسخه إلى Git أبدًا.
 
@@ -36,7 +41,9 @@ php artisan db:seed --class=StoreSettingsSeeder --force
 php artisan storage:link
 php artisan optimize          # config + routes + views + events cache
 ```
-بعد أي تحديث للكود: `git pull` ثم نفس الأوامر، ثم `php artisan queue:restart`.
+بعد أي تحديث للكود استخدم السكربت: `./scripts/deploy.sh` (وضع الصيانة، composer، الترحيلات `--force`، البناء، الكاش، إعادة تشغيل الطوابير، ثم فحص الجاهزية). للتراجع راجع `docs/ROLLBACK.md`، ولبيئة التجربة `docs/STAGING.md`.
+
+**فحص الجاهزية:** `php artisan store:check-production` — يخرج برمز 1 عند أي مشكلة حرجة (APP_DEBUG، HTTPS، قاعدة البيانات، الكاش، رابط الصور، الصلاحيات، الترحيلات، الطوابير، المُجدول، البيانات التجريبية، المدير العام، منطقة التوصيل، إعدادات المتجر). نفس النتائج في `/admin/system` للمدير العام.
 
 ## 4. صلاحيات الملفات
 ```bash
@@ -53,11 +60,26 @@ find storage bootstrap/cache -type f -exec chmod 664 {} \;
 ```
 يشغّل: إيقاف العروض المنتهية (كل 5 دقائق)، حذف سلال الزوار المهجورة (يوميًا)، تنظيف الرموز والإشعارات القديمة (يوميًا 03:30).
 
+المُجدول يسجّل نبضة كل دقيقة (`system:heartbeat`)؛ إذا توقفت أكثر من 5 دقائق تظهر «متوقف» في `/admin/system` ويفشل `store:check-production`.
+
 **Queue worker** (عبر Supervisor أو systemd):
 ```bash
 php artisan queue:work --queue=notifications,default --tries=3 --max-time=3600
 ```
-حاليًا لا توجد رسائل خارجية مفعلة، لكن الـ worker مطلوب بمجرد ربط واتساب/SMS.
+مثال Supervisor (`/etc/supervisor/conf.d/bait-almona-worker.conf`):
+```ini
+[program:bait-almona-worker]
+command=php /var/www/bait-almona/artisan queue:work database --queue=notifications,default --tries=3 --backoff=30 --max-time=3600 --sleep=3
+user=www-data
+numprocs=1
+autostart=true
+autorestart=true
+stopwaitsecs=3600
+redirect_stderr=true
+stdout_logfile=/var/www/bait-almona/storage/logs/worker.log
+```
+حاليًا لا توجد رسائل خارجية مفعلة، لكن الـ worker مطلوب لإشعارات الإدارة المؤجلة وبمجرد ربط واتساب/SMS.
+المهام الفاشلة: `/admin/system/failed-jobs` (إعادة/حذف) أو `php artisan queue:failed` و`queue:retry all`.
 
 ## 6. HTTPS
 - شهادة SSL (مثلًا Let's Encrypt) وتحويل كل HTTP إلى HTTPS.
@@ -87,9 +109,21 @@ php artisan queue:work --queue=notifications,default --tries=3 --max-time=3600
 mysqldump --single-transaction --routines --default-character-set=utf8mb4 -u USER -p DB | gzip > backup_$(date +%F).sql.gz
 ```
 **سياسة الاحتفاظ المقترحة:** يوميًا لآخر 7 أيام، أسبوعيًا لآخر 4 أسابيع، شهريًا لآخر 6 أشهر.
-احفظ نسخة واحدة على الأقل خارج الخادم (تخزين سحابي أو جهاز آخر)، وجرّب **الاسترجاع** مرة كل شهر.
+احفظ نسخة واحدة على الأقل خارج الخادم (تخزين سحابي أو جهاز آخر)، ولا تضع النسخ داخل `public/` أبدًا.
 
-## 9. أمان تشغيلي
+- [ ] **اختبر Restore فعلي قبل الإطلاق** على قاعدة منفصلة (الخطوات في `docs/ROLLBACK.md` §4)، ثم كرّره شهريًا.
+- ضع مسار النسخ في `BACKUP_PATH` وافحصه بـ `php artisan store:backup-status` (عمر وحجم آخر نسخة، قراءة فقط).
+
+## 9. قبل الإطلاق مباشرة
+- [ ] `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://...`
+- [ ] `php artisan store:check-production` ينتهي بـ 0.
+- [ ] `/admin/system` ← «جاهزية الإطلاق» كلها خضراء.
+- [ ] استبدال نص **سياسة الخصوصية** و**الشروط** بالنص القانوني المعتمد (`resources/views/store/pages/legal.blade.php`).
+- [ ] كتابة «نبذة عن المتجر» من الإعدادات (صفحة من نحن).
+- [ ] **اختبر Restore فعلي قبل الإطلاق.**
+- [ ] حذف البيانات التجريبية: `php artisan store:purge-demo --dry-run` ثم بدون `--dry-run`.
+
+## 10. أمان تشغيلي
 - لا تفعّل `APP_DEBUG=true` على الخادم أبدًا.
 - حدّث الحزم دوريًا: `composer audit` و `npm audit`.
 - راجع `/admin/audit-logs` دوريًا (متاح للمدير العام فقط).

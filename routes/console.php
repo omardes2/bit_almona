@@ -10,3 +10,6 @@ Schedule::command('carts:prune-guests')->daily();
 
 // Expired one-time codes and old read admin notifications.
 Schedule::command('store:cleanup')->dailyAt('03:30');
+
+// Heartbeat so the admin system page / store:check-production can detect a stopped cron.
+Schedule::command('system:heartbeat')->everyMinute();

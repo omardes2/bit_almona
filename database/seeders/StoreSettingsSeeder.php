@@ -24,6 +24,7 @@ class StoreSettingsSeeder extends Seeder
             ['key' => 'currency_symbol', 'value' => '₪', 'type' => SettingType::String, 'group' => 'orders', 'label' => 'رمز العملة'],
             ['key' => 'min_order_amount', 'value' => '0', 'type' => SettingType::Decimal, 'group' => 'orders', 'label' => 'الحد الأدنى للطلب'],
             ['key' => 'working_hours', 'value' => null, 'type' => SettingType::Text, 'group' => 'contact', 'label' => 'ساعات العمل'],
+            ['key' => 'about_text', 'value' => null, 'type' => SettingType::Text, 'group' => 'general', 'label' => 'نبذة عن المتجر'],
         ];
 
         foreach ($settings as $setting) {

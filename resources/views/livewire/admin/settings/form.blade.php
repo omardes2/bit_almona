@@ -9,6 +9,10 @@
                 <input id="store_name" type="text" wire:model="store_name" class="form-input" required>
             </x-admin.field>
 
+            <x-admin.field label="نبذة عن المتجر (صفحة «من نحن»)" for="about_text" error="about_text" hint="اختياري. تظهر في صفحة «من نحن» كما تكتبها.">
+                <textarea id="about_text" wire:model="about_text" rows="4" maxlength="3000" class="form-input"></textarea>
+            </x-admin.field>
+
             <x-admin.image-input model="logo" :upload="$logo" :current="$logoUrl" label="الشعار (يُفضّل PNG بخلفية شفافة)"
                                  :remove-action="$logoUrl ? 'removeLogo' : null" />
         </section>

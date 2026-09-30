@@ -9,6 +9,10 @@
         </div>
     @endif
 
+    @if (session('status'))
+        <div class="mb-4 rounded-xl bg-brand-50 p-3 text-sm text-brand-700 ring-1 ring-brand-100" role="status">{{ session('status') }}</div>
+    @endif
+
     <form wire:submit="login" class="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
         <x-input name="phone" label="رقم الجوال" type="tel" inputmode="tel" autocomplete="tel"
                  placeholder="05XXXXXXXX" class="ltr-nums text-left" wire:model="phone" required autofocus />
@@ -16,10 +20,13 @@
         <x-input name="password" label="كلمة المرور" type="password" autocomplete="current-password"
                  wire:model="password" required />
 
-        <label class="flex items-center gap-2 text-sm text-gray-700">
-            <input type="checkbox" wire:model="remember" class="rounded border-gray-300 text-brand-600">
-            تذكرني
-        </label>
+        <div class="flex items-center justify-between gap-2">
+            <label class="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" wire:model="remember" class="rounded border-gray-300 text-brand-600">
+                تذكرني
+            </label>
+            <a href="{{ route('password.forgot') }}" wire:navigate class="text-sm font-medium text-brand-700">نسيت كلمة المرور؟</a>
+        </div>
 
         <button type="submit" wire:loading.attr="disabled"
                 class="w-full rounded-lg bg-brand-600 py-3 font-bold text-white hover:bg-brand-700 disabled:opacity-60">

@@ -21,6 +21,16 @@ class CashOnDeliveryProvider implements PaymentProvider
         return PaymentMethod::CashOnDelivery;
     }
 
+    public function isOnline(): bool
+    {
+        return false;
+    }
+
+    public function redirectUrl(Payment $payment): ?string
+    {
+        return null;
+    }
+
     public function createPayment(Order $order): Payment
     {
         return $order->payments()->create([

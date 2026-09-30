@@ -48,6 +48,8 @@ class StoreSettingsForm extends Component
 
     public string $working_hours = '';
 
+    public string $about_text = '';
+
     /** @var TemporaryUploadedFile|null */
     public $logo = null;
 
@@ -58,7 +60,7 @@ class StoreSettingsForm extends Component
 
     public function mount(): void
     {
-        foreach (['store_name', 'store_phone', 'store_whatsapp', 'store_address', 'working_hours'] as $key) {
+        foreach (['store_name', 'store_phone', 'store_whatsapp', 'store_address', 'working_hours', 'about_text'] as $key) {
             $this->{$key} = (string) StoreSetting::get($key, '');
         }
 
@@ -77,6 +79,7 @@ class StoreSettingsForm extends Component
             'currency_code' => ['required', Rule::in(array_keys(self::CURRENCIES))],
             'min_order_amount' => ['nullable', 'numeric', 'decimal:0,2', 'min:0', 'max:99999'],
             'working_hours' => ['nullable', 'string', 'max:500'],
+            'about_text' => ['nullable', 'string', 'max:3000'],
             'logo' => ImageRules::rules(),
         ];
     }
@@ -91,6 +94,7 @@ class StoreSettingsForm extends Component
             'currency_code' => 'العملة',
             'min_order_amount' => 'الحد الأدنى للطلب',
             'working_hours' => 'ساعات العمل',
+            'about_text' => 'نبذة عن المتجر',
             'logo' => 'الشعار',
         ];
     }
@@ -125,6 +129,7 @@ class StoreSettingsForm extends Component
             StoreSetting::set('currency_symbol', self::CURRENCIES[$data['currency_code']]['symbol'], SettingType::String);
             StoreSetting::set('min_order_amount', $data['min_order_amount'] !== '' ? $data['min_order_amount'] : null, SettingType::Decimal);
             StoreSetting::set('working_hours', $data['working_hours'] ?: null, SettingType::Text);
+            StoreSetting::set('about_text', trim((string) $data['about_text']) ?: null, SettingType::Text);
 
             if ($newLogo) {
                 StoreSetting::set('store_logo', $newLogo, SettingType::Image);

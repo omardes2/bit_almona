@@ -28,6 +28,7 @@ class AuditLogIndex extends Component
         'created' => 'إنشاء', 'updated' => 'تعديل', 'deleted' => 'حذف', 'restored' => 'استعادة',
         'force_deleted' => 'حذف نهائي', 'status_changed' => 'تغيير حالة',
         'payment_status_changed' => 'تغيير حالة الدفع', 'export' => 'تصدير',
+        'password_reset' => 'استعادة كلمة المرور', 'phone_changed' => 'تغيير رقم الجوال',
     ];
 
     #[Url(except: '')]

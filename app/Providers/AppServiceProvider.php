@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Enums\AdminRole;
 use App\Events\Orders\OrderEvent;
+use App\Http\Middleware\EnsurePhoneIsVerified;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Models\Banner;
 use App\Models\Category;
@@ -27,13 +28,17 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Events\NotificationFailed;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Livewire;
 
@@ -104,6 +109,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-settings', fn (User $user) => $user->isActive()
             && $user->hasAdminRole(AdminRole::SuperAdmin));
 
+        // System status, failed jobs and integrations: super admin only.
+        Gate::define('manage-system', fn (User $user) => $user->isActive()
+            && $user->hasAdminRole(AdminRole::SuperAdmin));
+
         // For the future OTP endpoints (the OtpService also limits per phone + purpose).
         RateLimiter::for('otp', fn (Request $request) => [
             Limit::perMinute(3)->by('otp-ip:'.$request->ip()),
@@ -113,13 +122,27 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('checkout', fn (Request $request) => Limit::perMinute(6)->by('checkout:'.($request->user()?->id ?: $request->ip())));
 
         // Re-apply the admin check on every Livewire update request, not only on page load.
-        Livewire::addPersistentMiddleware([EnsureUserIsAdmin::class]);
+        Livewire::addPersistentMiddleware([EnsureUserIsAdmin::class, EnsurePhoneIsVerified::class]);
 
         // Order lifecycle => admin bell + (future) customer WhatsApp/SMS/email.
         foreach (OrderEvent::all() as $orderEvent) {
             Event::listen($orderEvent, NotifyAdminsAboutOrders::class);
             Event::listen($orderEvent, NotifyCustomerAboutOrder::class);
         }
+
+        // Operational failures are logged with safe context only (the log tap redacts secrets too).
+        Event::listen(JobFailed::class, fn (JobFailed $event) => Log::error('queue.job_failed', [
+            'job' => $event->job->resolveName(),
+            'queue' => $event->job->getQueue(),
+            'connection' => $event->connectionName,
+            'error' => $event->exception::class.': '.Str::limit($event->exception->getMessage(), 300),
+        ]));
+
+        Event::listen(NotificationFailed::class, fn (NotificationFailed $event) => Log::warning('notification.failed', [
+            'notification' => $event->notification::class,
+            'channel' => $event->channel,
+            'notifiable' => $event->notifiable instanceof Model ? $event->notifiable->getMorphClass().':'.$event->notifiable->getKey() : null,
+        ]));
 
         // Guest cart => customer cart when signing in (or right after registering).
         Event::listen(Login::class, fn (Login $event) => app(CartService::class)->mergeGuestCart(

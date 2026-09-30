@@ -22,6 +22,7 @@ final class AdminNavigation
             'customers' => Gate::allows('manage-customers'),
             'reports' => Gate::allows('view-reports'),
             'audit' => Gate::allows('view-audit-logs'),
+            'system' => Gate::allows('manage-system'),
         ];
 
         $items = [
@@ -35,6 +36,8 @@ final class AdminNavigation
             ['label' => 'التقارير', 'route' => 'admin.reports', 'active' => 'admin.reports', 'icon' => 'chart', 'gate' => 'reports'],
             ['label' => 'مناطق التوصيل', 'route' => 'admin.delivery-zones.index', 'active' => 'admin.delivery-zones.*', 'icon' => 'zones', 'gate' => 'delivery'],
             ['label' => 'الإعدادات', 'route' => 'admin.settings', 'active' => 'admin.settings', 'icon' => 'settings', 'gate' => 'settings'],
+            ['label' => 'التكاملات', 'route' => 'admin.integrations', 'active' => 'admin.integrations', 'icon' => 'plug', 'gate' => 'system'],
+            ['label' => 'حالة النظام', 'route' => 'admin.system', 'active' => 'admin.system*', 'icon' => 'server', 'gate' => 'system'],
             ['label' => 'سجل العمليات', 'route' => 'admin.audit-logs', 'active' => 'admin.audit-logs', 'icon' => 'history', 'gate' => 'audit'],
         ];
 

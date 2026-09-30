@@ -42,7 +42,21 @@
         <div class="rounded-lg bg-brand-50 p-3 text-sm text-brand-700">{{ session('status') }}</div>
     @endif
 
-    <p class="text-xs text-gray-500">رقم الجوال (<span class="ltr-nums">{{ $this->user->phone }}</span>) هو رقم الدخول ولا يمكن تغييره حاليًا. للتغيير تواصل مع المتجر.</p>
+    <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-white p-4 text-sm shadow-sm">
+        <div>
+            <span class="text-gray-600">رقم الجوال (رقم الدخول):</span>
+            <bdi dir="ltr" class="font-bold">{{ $this->user->phone }}</bdi>
+            @if ($this->user->hasVerifiedPhone())
+                <span class="ms-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold text-green-800">موثّق</span>
+            @endif
+        </div>
+        <div class="flex gap-3">
+            @if (! $this->user->hasVerifiedPhone() && $otpAvailable)
+                <a href="{{ route('account.verify-phone') }}" wire:navigate class="font-medium text-brand-700">توثيق الرقم</a>
+            @endif
+            <a href="{{ route('account.phone') }}" wire:navigate class="font-medium text-brand-700">تغيير الرقم</a>
+        </div>
+    </div>
 
     <form wire:submit="updateProfile" class="space-y-4 rounded-2xl bg-white p-5 shadow-sm">
         <h2 id="profile" class="font-bold">بياناتي</h2>

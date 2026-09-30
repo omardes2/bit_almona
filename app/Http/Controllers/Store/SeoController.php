@@ -25,12 +25,19 @@ class SeoController extends Controller
 
     public function robots(): Response
     {
+        // A staging copy must never be indexed (see docs/STAGING.md).
+        if (app()->environment('staging')) {
+            return response("User-agent: *\nDisallow: /\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+        }
+
         $lines = [
             'User-agent: *',
             'Allow: /',
             'Disallow: /admin',
             'Disallow: /login',
             'Disallow: /register',
+            'Disallow: /forgot-password',
+            'Disallow: /checkout',
             'Disallow: /account',
             'Disallow: /cart',
             'Disallow: /search',

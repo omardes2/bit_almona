@@ -24,6 +24,11 @@ class SecurityHeaders
             $response->headers->set('Content-Security-Policy', "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'");
         }
 
+        // Belt and braces for staging: even if robots.txt is ignored, ask crawlers not to index.
+        if (app()->environment('staging')) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow');
+        }
+
         if ($request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
         }
