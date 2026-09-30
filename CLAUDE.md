@@ -16,3 +16,11 @@
 - Offer/banner state: `HasSchedule` trait (`scheduleStatus()`, `withScheduleStatus()`), never `is_active` alone.
 - Products are soft deleted (`DeleteProduct` also disables their offers); categories with children/products can't be deleted.
 - Admin model changes are logged to `audit_logs` via the `Auditable` trait.
+- Storefront (Phase 3): controllers in `app/Http/Controllers/Store` render `resources/views/store/*` with
+  `<x-layouts::app>` (same `layouts/app.blade.php` Livewire uses). Products shown to customers must use
+  `Product::storefront()` (not hidden, not trashed, active category); prices via `$product->price()` (memoised resolver).
+- Cart: `App\Services\Cart\CartService` only — guest carts by session token (`carts.session_id`), users by `user_id`,
+  merged on the `Login` event. Quantities are integer thousandths via `QuantityRules` (min/step/stock).
+  The browser only ever sends a product id + quantity (`add-to-cart` event handled by `Livewire\Store\CartDrawer`).
+- `StorefrontCache` caches plain arrays (the cache refuses to unserialize objects) and is flushed on
+  Category/Banner save/delete and on reorder.

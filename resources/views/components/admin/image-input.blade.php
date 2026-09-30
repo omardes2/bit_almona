@@ -12,7 +12,7 @@
 
         <div class="flex flex-1 flex-wrap items-center gap-2">
             <label class="btn-secondary cursor-pointer">
-                <x-admin.icon name="photo" />
+                <x-icon name="photo" />
                 <span>{{ $preview ? 'تغيير الصورة' : 'اختيار صورة' }}</span>
                 <input type="file" wire:model="{{ $model }}" accept="image/jpeg,image/png,image/webp" class="sr-only">
             </label>

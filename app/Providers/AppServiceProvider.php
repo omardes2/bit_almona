@@ -9,15 +9,19 @@ use App\Models\Category;
 use App\Models\Offer;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Cart\CartService;
 use App\Services\Media\GdImageProcessor;
 use App\Services\Media\ImageProcessor;
 use App\Support\Store;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
@@ -67,6 +71,15 @@ class AppServiceProvider extends ServiceProvider
         // Re-apply the admin check on every Livewire update request, not only on page load.
         Livewire::addPersistentMiddleware([EnsureUserIsAdmin::class]);
 
-        View::composer(['layouts.*', 'home'], fn ($view) => $view->with('storeName', Store::name()));
+        // Guest cart => customer cart when signing in (or right after registering).
+        Event::listen(Login::class, fn (Login $event) => app(CartService::class)->mergeGuestCart(
+            $event->user,
+            session()->pull(CartService::SESSION_KEY),
+        ));
+
+        // <x-layouts::app> for controller-rendered storefront pages (Livewire pages use layouts.app directly).
+        Blade::anonymousComponentPath(resource_path('views/layouts'), 'layouts');
+
+        View::composer(['layouts.*', 'store.*'], fn ($view) => $view->with('storeName', Store::name()));
     }
 }

@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Store\CategoryController;
+use App\Http\Controllers\Store\HomeController;
+use App\Http\Controllers\Store\OffersController;
+use App\Http\Controllers\Store\ProductController;
+use App\Http\Controllers\Store\SeoController;
 use App\Livewire\Account\Dashboard as AccountDashboard;
 use App\Livewire\Admin\Auth\Login as AdminLogin;
 use App\Livewire\Admin\Banners\BannerForm;
@@ -14,6 +19,8 @@ use App\Livewire\Admin\Products\ProductForm;
 use App\Livewire\Admin\Products\ProductIndex;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Register;
+use App\Livewire\Store\CartPage;
+use App\Livewire\Store\SearchPage;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,7 +29,15 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::view('/', 'home')->name('home');
+Route::get('/', HomeController::class)->name('home');
+Route::get('/category/{category}', [CategoryController::class, 'show'])->name('category.show');
+Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
+Route::get('/offers', OffersController::class)->name('offers');
+Route::livewire('/search', SearchPage::class)->name('search');
+Route::livewire('/cart', CartPage::class)->name('cart');
+
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 
 /*
 |--------------------------------------------------------------------------

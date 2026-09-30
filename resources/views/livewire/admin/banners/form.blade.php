@@ -14,7 +14,7 @@
                         <img src="{{ $preview }}" alt="" class="aspect-[16/7] w-full object-cover">
                     @else
                         <span class="flex aspect-[16/7] flex-col items-center justify-center gap-2 text-gray-500">
-                            <x-admin.icon name="photo" class="size-10" />
+                            <x-icon name="photo" class="size-10" />
                             <span class="text-sm">اضغط لاختيار صورة</span>
                         </span>
                     @endif

@@ -25,7 +25,7 @@
                 </div>
             @else
                 <div class="relative">
-                    <x-admin.icon name="search" class="pointer-events-none absolute inset-y-0 start-3 my-auto text-gray-400" />
+                    <x-icon name="search" class="pointer-events-none absolute inset-y-0 start-3 my-auto text-gray-400" />
                     <input type="search" wire:model.live.debounce.300ms="productSearch" placeholder="ابحث عن المنتج بالاسم أو SKU..." class="form-input ps-10" autocomplete="off">
                 </div>
                 @if ($this->productResults->isNotEmpty())

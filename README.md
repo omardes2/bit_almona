@@ -16,6 +16,7 @@ npm install && npm run build
 php artisan serve
 ```
 
+- المتجر: `/` · `/category/{slug}` · `/product/{slug}` · `/offers` · `/search` · `/cart` · `/sitemap.xml` · `/robots.txt`
 - الزبائن: `/login` و `/register` و `/account`
 - الإدارة: `/admin/login` و `/admin`
   - المنتجات `/admin/products` · الأقسام `/admin/categories` · العروض `/admin/offers` · البنرات `/admin/banners`
@@ -36,4 +37,5 @@ php artisan serve
 |---|---|
 | `php artisan test` | تشغيل الاختبارات |
 | `php artisan offers:deactivate-expired` | إيقاف العروض المنتهية (مجدول كل 5 دقائق) |
+| `php artisan carts:prune-guests` | حذف سلال الزوار المهجورة (مجدول يوميًا) |
 | `php artisan schedule:work` | تشغيل المجدول محليًا (في الإنتاج: cron لـ `schedule:run`) |

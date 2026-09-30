@@ -60,3 +60,9 @@
 @utility card {
     @apply rounded-2xl bg-white shadow-sm ring-1 ring-gray-200/70;
 }
+
+/* Clear keyboard focus everywhere (storefront + admin). */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+}

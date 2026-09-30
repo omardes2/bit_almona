@@ -2,7 +2,7 @@
     <x-admin.page-header title="البنرات" subtitle="الإعلانات التي تظهر في واجهة المتجر">
         <x-slot:actions>
             <a href="{{ route('admin.banners.create') }}" wire:navigate class="btn-primary">
-                <x-admin.icon name="plus" /> إضافة بنر
+                <x-icon name="plus" /> إضافة بنر
             </a>
         </x-slot:actions>
     </x-admin.page-header>
@@ -37,11 +37,11 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-1 border-t border-gray-100 p-2">
-                        <a href="{{ route('admin.banners.edit', $banner) }}" wire:navigate class="btn-ghost flex-1"><x-admin.icon name="edit" class="size-4" /> تعديل</a>
+                        <a href="{{ route('admin.banners.edit', $banner) }}" wire:navigate class="btn-ghost flex-1"><x-icon name="edit" class="size-4" /> تعديل</a>
                         <button type="button" wire:click="toggleActive({{ $banner->id }})" class="btn-ghost flex-1">{{ $banner->is_active ? 'تعطيل' : 'تفعيل' }}</button>
-                        <button type="button" wire:click="move({{ $banner->id }}, -1)" class="btn-ghost px-2" aria-label="تحريك للأعلى"><x-admin.icon name="up" class="size-4" /></button>
-                        <button type="button" wire:click="move({{ $banner->id }}, 1)" class="btn-ghost px-2" aria-label="تحريك للأسفل"><x-admin.icon name="down" class="size-4" /></button>
-                        <button type="button" wire:click="delete({{ $banner->id }})" wire:confirm="حذف هذا البنر نهائيًا؟" class="btn-ghost px-2 text-red-600" aria-label="حذف"><x-admin.icon name="trash" class="size-4" /></button>
+                        <button type="button" wire:click="move({{ $banner->id }}, -1)" class="btn-ghost px-2" aria-label="تحريك للأعلى"><x-icon name="up" class="size-4" /></button>
+                        <button type="button" wire:click="move({{ $banner->id }}, 1)" class="btn-ghost px-2" aria-label="تحريك للأسفل"><x-icon name="down" class="size-4" /></button>
+                        <button type="button" wire:click="delete({{ $banner->id }})" wire:confirm="حذف هذا البنر نهائيًا؟" class="btn-ghost px-2 text-red-600" aria-label="حذف"><x-icon name="trash" class="size-4" /></button>
                     </div>
                 </div>
             @empty

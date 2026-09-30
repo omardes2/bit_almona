@@ -3,7 +3,7 @@
         @if ($canManageCatalog)
             <x-slot:actions>
                 <a href="{{ route('admin.products.create') }}" wire:navigate class="btn-primary">
-                    <x-admin.icon name="plus" /> إضافة منتج
+                    <x-icon name="plus" /> إضافة منتج
                 </a>
             </x-slot:actions>
         @endif
@@ -39,7 +39,7 @@
     <section class="card mt-6 p-4 sm:p-5">
         <div class="mb-3 flex items-center justify-between">
             <h2 class="flex items-center gap-2 font-bold">
-                <x-admin.icon name="alert" class="text-red-500" /> منتجات منخفضة المخزون
+                <x-icon name="alert" class="text-red-500" /> منتجات منخفضة المخزون
             </h2>
             @if ($canManageCatalog && $lowStockProducts->isNotEmpty())
                 <a href="{{ route('admin.products.index', ['lowStock' => 1]) }}" wire:navigate class="text-sm font-medium text-brand-700">عرض الكل</a>
@@ -56,7 +56,7 @@
                 <span class="rounded-lg bg-red-50 px-2 py-1 text-sm font-bold text-red-700">{{ (float) $product->stock_quantity }}</span>
                 @if ($canManageCatalog)
                     <a href="{{ route('admin.products.edit', $product) }}" wire:navigate class="btn-ghost" aria-label="تعديل">
-                        <x-admin.icon name="edit" />
+                        <x-icon name="edit" />
                     </a>
                 @endif
             </div>

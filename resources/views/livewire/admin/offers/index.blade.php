@@ -2,7 +2,7 @@
     <x-admin.page-header title="العروض" :subtitle="$offers->total().' عرض'">
         <x-slot:actions>
             <a href="{{ route('admin.offers.create') }}" wire:navigate class="btn-primary">
-                <x-admin.icon name="plus" /> إنشاء عرض
+                <x-icon name="plus" /> إنشاء عرض
             </a>
         </x-slot:actions>
     </x-admin.page-header>
@@ -14,7 +14,7 @@
         <div class="mb-4 space-y-2">
             <div class="flex gap-2">
             <div class="relative flex-1">
-                <x-admin.icon name="search" class="pointer-events-none absolute inset-y-0 start-3 my-auto text-gray-400" />
+                <x-icon name="search" class="pointer-events-none absolute inset-y-0 start-3 my-auto text-gray-400" />
                 <input type="search" wire:model.live.debounce.400ms="search" placeholder="ابحث باسم المنتج أو SKU..." class="form-input ps-10">
             </div>
                 <select wire:model.live="sort" class="form-input w-36 shrink-0 text-sm sm:w-56" aria-label="الترتيب">
@@ -62,13 +62,13 @@
                     <div x-data="{ open: false }" class="relative shrink-0 self-start">
                         <button type="button" @click="open = !open" @click.outside="open = false" class="btn-ghost min-h-9 px-2" aria-label="خيارات">⋮</button>
                         <div x-show="open" x-cloak x-transition.origin.top.left class="absolute end-0 z-20 mt-1 w-48 overflow-hidden rounded-xl bg-white py-1 text-sm shadow-lg ring-1 ring-gray-200">
-                            <a href="{{ route('admin.offers.edit', $offer) }}" wire:navigate class="flex items-center gap-2 px-4 py-3 hover:bg-gray-50"><x-admin.icon name="edit" class="size-4" /> تعديل</a>
+                            <a href="{{ route('admin.offers.edit', $offer) }}" wire:navigate class="flex items-center gap-2 px-4 py-3 hover:bg-gray-50"><x-icon name="edit" class="size-4" /> تعديل</a>
                             <button type="button" wire:click="toggleActive({{ $offer->id }})" @click="open = false" class="flex w-full items-center gap-2 px-4 py-3 hover:bg-gray-50">{{ $offer->is_active ? 'إيقاف العرض' : 'تفعيل العرض' }}</button>
                             @if ($sort === 'sort_order')
-                                <button type="button" wire:click="move({{ $offer->id }}, -1)" class="flex w-full items-center gap-2 px-4 py-3 hover:bg-gray-50"><x-admin.icon name="up" class="size-4" /> تحريك للأعلى</button>
-                                <button type="button" wire:click="move({{ $offer->id }}, 1)" class="flex w-full items-center gap-2 px-4 py-3 hover:bg-gray-50"><x-admin.icon name="down" class="size-4" /> تحريك للأسفل</button>
+                                <button type="button" wire:click="move({{ $offer->id }}, -1)" class="flex w-full items-center gap-2 px-4 py-3 hover:bg-gray-50"><x-icon name="up" class="size-4" /> تحريك للأعلى</button>
+                                <button type="button" wire:click="move({{ $offer->id }}, 1)" class="flex w-full items-center gap-2 px-4 py-3 hover:bg-gray-50"><x-icon name="down" class="size-4" /> تحريك للأسفل</button>
                             @endif
-                            <button type="button" wire:click="delete({{ $offer->id }})" @click="open = false" wire:confirm="حذف هذا العرض نهائيًا؟ (يمكنك إيقافه بدل حذفه)" class="flex w-full items-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50"><x-admin.icon name="trash" class="size-4" /> حذف</button>
+                            <button type="button" wire:click="delete({{ $offer->id }})" @click="open = false" wire:confirm="حذف هذا العرض نهائيًا؟ (يمكنك إيقافه بدل حذفه)" class="flex w-full items-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50"><x-icon name="trash" class="size-4" /> حذف</button>
                         </div>
                     </div>
                 </div>

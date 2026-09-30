@@ -4,7 +4,7 @@
     <nav role="navigation" aria-label="التنقل بين الصفحات" class="flex items-center justify-between gap-2">
         <button type="button" wire:click="previousPage('{{ $pageName }}')" wire:loading.attr="disabled"
                 @disabled($paginator->onFirstPage()) class="btn-secondary">
-            <x-admin.icon name="arrow-right" class="size-4" /> السابق
+            <x-icon name="arrow-right" class="size-4" /> السابق
         </button>
 
         <div class="flex items-center gap-1 text-sm text-gray-600">
@@ -20,7 +20,7 @@
 
         <button type="button" wire:click="nextPage('{{ $pageName }}')" wire:loading.attr="disabled"
                 @disabled(! $paginator->hasMorePages()) class="btn-secondary">
-            التالي <x-admin.icon name="arrow-right" class="size-4 rotate-180" />
+            التالي <x-icon name="arrow-right" class="size-4 rotate-180" />
         </button>
     </nav>
 @endif

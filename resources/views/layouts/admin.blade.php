@@ -28,7 +28,7 @@
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-gray-600 hover:bg-gray-100">
-                                <x-admin.icon name="logout" /> تسجيل الخروج
+                                <x-icon name="logout" /> تسجيل الخروج
                             </button>
                         </form>
                     </div>
@@ -37,7 +37,7 @@
                 {{-- Mobile header --}}
                 <header class="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-gray-200 bg-white px-3 lg:hidden">
                     <button type="button" @click="menuOpen = true" class="rounded-lg p-2 text-gray-700 hover:bg-gray-100" aria-label="فتح القائمة">
-                        <x-admin.icon name="menu" class="size-7" />
+                        <x-icon name="menu" class="size-7" />
                     </button>
                     <a href="{{ route('admin.dashboard') }}" wire:navigate class="font-bold text-brand-700">{{ $storeName }}</a>
                     <span class="w-11"></span>
@@ -53,7 +53,7 @@
                         <div class="flex h-14 items-center justify-between border-b border-gray-100 px-4">
                             <span class="font-bold text-brand-700">{{ $storeName }}</span>
                             <button type="button" @click="menuOpen = false" class="rounded-lg p-2 hover:bg-gray-100" aria-label="إغلاق القائمة">
-                                <x-admin.icon name="close" class="size-6" />
+                                <x-icon name="close" class="size-6" />
                             </button>
                         </div>
                         <div class="flex-1 overflow-y-auto p-3" @click="if ($event.target.closest('a')) menuOpen = false">
@@ -64,7 +64,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-gray-600 hover:bg-gray-100">
-                                    <x-admin.icon name="logout" /> تسجيل الخروج
+                                    <x-icon name="logout" /> تسجيل الخروج
                                 </button>
                             </form>
                         </div>
@@ -83,7 +83,7 @@
             </main>
         @endauth
 
-        <x-admin.toasts />
+        <x-toasts />
 
         @livewireScripts
     </body>

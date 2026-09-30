@@ -1,5 +1,5 @@
 {{-- Toasts: Livewire `$this->dispatch('toast', message: ..., type: ...)` or session('toast') after a redirect. --}}
-<div x-data="adminToasts(@js(session('toast')))"
+<div x-data="toasts(@js(session('toast')))"
      @toast.window="add($event.detail)"
      class="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4 sm:bottom-6"
      aria-live="polite">

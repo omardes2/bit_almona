@@ -2,7 +2,7 @@
     <x-admin.page-header title="المنتجات" :subtitle="$products->total().' منتج'">
         <x-slot:actions>
             <a href="{{ route('admin.products.create') }}" wire:navigate class="btn-primary">
-                <x-admin.icon name="plus" /> إضافة منتج
+                <x-icon name="plus" /> إضافة منتج
             </a>
         </x-slot:actions>
     </x-admin.page-header>
@@ -15,7 +15,7 @@
         <div x-data="{ open: @js($filtering) }" class="mb-4 space-y-2">
             <div class="flex gap-2">
                 <div class="relative flex-1">
-                    <x-admin.icon name="search" class="pointer-events-none absolute inset-y-0 start-3 my-auto text-gray-400" />
+                    <x-icon name="search" class="pointer-events-none absolute inset-y-0 start-3 my-auto text-gray-400" />
                     <input type="search" wire:model.live.debounce.400ms="search" placeholder="ابحث بالاسم أو SKU..." class="form-input ps-10" aria-label="بحث">
                     <span wire:loading wire:target="search" class="absolute inset-y-0 end-3 my-auto h-5 text-xs text-gray-400">...</span>
                 </div>

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\Auditable;
 use App\Models\Concerns\HasSchedule;
 use App\Services\Media\ImageStorage;
+use App\Support\StorefrontCache;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +15,12 @@ use Illuminate\Database\Eloquent\Model;
 class Banner extends Model
 {
     use Auditable, HasFactory, HasSchedule;
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => StorefrontCache::flush());
+        static::deleted(fn () => StorefrontCache::flush());
+    }
 
     protected function casts(): array
     {

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Concerns;
 
+use App\Support\StorefrontCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,5 +31,8 @@ trait ReordersRecords
                 $record->newQuery()->whereKey($id)->update(['sort_order' => $position + 1]);
             }
         }
+
+        // Mass updates skip model events, so invalidate storefront caches explicitly.
+        StorefrontCache::flush();
     }
 }

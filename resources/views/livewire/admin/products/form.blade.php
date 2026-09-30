@@ -3,10 +3,10 @@
         @if ($product)
             <x-slot:actions>
                 <button type="button" wire:click="duplicate" wire:confirm="إنشاء نسخة من هذا المنتج؟ ستكون النسخة مخفية حتى تراجعها." class="btn-secondary">
-                    <x-admin.icon name="copy" /> نسخ المنتج
+                    <x-icon name="copy" /> نسخ المنتج
                 </button>
                 <button type="button" wire:click="delete" wire:confirm="حذف المنتج «{{ $product->name }}»؟ ستتوقف عروضه، ويمكن استعادته لاحقًا." class="btn-ghost text-red-600">
-                    <x-admin.icon name="trash" /> حذف
+                    <x-icon name="trash" /> حذف
                 </button>
             </x-slot:actions>
         @endif
@@ -105,10 +105,10 @@
                             <div wire:key="img-{{ $image->id }}" class="group relative overflow-hidden rounded-xl bg-gray-100">
                                 <img src="{{ $image->thumbnailUrl() }}" alt="" loading="lazy" class="aspect-square w-full object-cover">
                                 <div class="absolute inset-x-0 bottom-0 flex justify-between bg-black/55 p-1">
-                                    <button type="button" wire:click="moveImage({{ $image->id }}, -1)" class="rounded p-1.5 text-white hover:bg-white/20" aria-label="تقديم"><x-admin.icon name="arrow-right" class="size-4" /></button>
-                                    <button type="button" wire:click="makeMain({{ $image->id }})" class="rounded p-1.5 text-white hover:bg-white/20" title="تعيين كصورة رئيسية" aria-label="تعيين كصورة رئيسية"><x-admin.icon name="star" class="size-4" /></button>
-                                    <button type="button" wire:click="deleteImage({{ $image->id }})" wire:confirm="حذف هذه الصورة؟" class="rounded p-1.5 text-white hover:bg-red-500" aria-label="حذف"><x-admin.icon name="trash" class="size-4" /></button>
-                                    <button type="button" wire:click="moveImage({{ $image->id }}, 1)" class="rounded p-1.5 text-white hover:bg-white/20" aria-label="تأخير"><x-admin.icon name="arrow-right" class="size-4 rotate-180" /></button>
+                                    <button type="button" wire:click="moveImage({{ $image->id }}, -1)" class="rounded p-1.5 text-white hover:bg-white/20" aria-label="تقديم"><x-icon name="arrow-right" class="size-4" /></button>
+                                    <button type="button" wire:click="makeMain({{ $image->id }})" class="rounded p-1.5 text-white hover:bg-white/20" title="تعيين كصورة رئيسية" aria-label="تعيين كصورة رئيسية"><x-icon name="star" class="size-4" /></button>
+                                    <button type="button" wire:click="deleteImage({{ $image->id }})" wire:confirm="حذف هذه الصورة؟" class="rounded p-1.5 text-white hover:bg-red-500" aria-label="حذف"><x-icon name="trash" class="size-4" /></button>
+                                    <button type="button" wire:click="moveImage({{ $image->id }}, 1)" class="rounded p-1.5 text-white hover:bg-white/20" aria-label="تأخير"><x-icon name="arrow-right" class="size-4 rotate-180" /></button>
                                 </div>
                             </div>
                         @endforeach
@@ -119,12 +119,12 @@
                                     <img src="{{ $upload->temporaryUrl() }}" alt="" class="aspect-square w-full object-cover">
                                 @endif
                                 <span class="absolute top-1 start-1 rounded bg-brand-600 px-1.5 text-xs text-white">جديدة</span>
-                                <button type="button" wire:click="removeNewImage({{ $index }})" class="absolute top-1 end-1 rounded-full bg-black/60 p-1 text-white" aria-label="إزالة"><x-admin.icon name="close" class="size-4" /></button>
+                                <button type="button" wire:click="removeNewImage({{ $index }})" class="absolute top-1 end-1 rounded-full bg-black/60 p-1 text-white" aria-label="إزالة"><x-icon name="close" class="size-4" /></button>
                             </div>
                         @endforeach
 
                         <label class="flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-brand-500 hover:text-brand-600">
-                            <x-admin.icon name="plus" class="size-7" />
+                            <x-icon name="plus" class="size-7" />
                             <span class="text-xs">إضافة صور</span>
                             <input type="file" multiple wire:model="newImages" accept="image/jpeg,image/png,image/webp" class="sr-only">
                         </label>
@@ -142,7 +142,7 @@
             <section x-data="{ open: @js(filled($seo_title) || filled($seo_description) || $errors->hasAny(['seo_title', 'seo_description', 'slug'])) }" class="card p-4 sm:p-6">
                 <button type="button" @click="open = !open" class="flex w-full items-center justify-between font-bold">
                     <span>تحسين محركات البحث (SEO)</span>
-                    <x-admin.icon name="down" class="size-5 transition" ::class="open && 'rotate-180'" />
+                    <x-icon name="down" class="size-5 transition" ::class="open && 'rotate-180'" />
                 </button>
                 <div x-show="open" x-cloak class="mt-4 space-y-4">
                     <x-admin.field label="الرابط المختصر (slug)" for="slug" error="slug" hint="اتركه فارغًا ليُنشأ تلقائيًا من الاسم.">

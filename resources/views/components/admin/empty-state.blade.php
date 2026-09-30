@@ -2,7 +2,7 @@
 
 <div class="card flex flex-col items-center px-6 py-12 text-center">
     <div class="mb-4 rounded-full bg-brand-50 p-4 text-brand-600">
-        <x-admin.icon :name="$icon" class="size-8" />
+        <x-icon :name="$icon" class="size-8" />
     </div>
     <h2 class="text-lg font-bold">{{ $title }}</h2>
     @if ($description)
@@ -10,7 +10,7 @@
     @endif
     @if ($actionLabel && $actionUrl)
         <a href="{{ $actionUrl }}" wire:navigate class="btn-primary mt-5">
-            <x-admin.icon name="plus" /> {{ $actionLabel }}
+            <x-icon name="plus" /> {{ $actionLabel }}
         </a>
     @endif
     {{ $slot }}

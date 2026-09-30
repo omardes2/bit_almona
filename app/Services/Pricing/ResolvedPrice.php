@@ -14,4 +14,21 @@ final readonly class ResolvedPrice
     {
         return $this->finalPrice < $this->originalPrice;
     }
+
+    public function isOffer(): bool
+    {
+        return $this->offerId !== null;
+    }
+
+    /**
+     * Discount percentage, computed on the server from the resolved prices.
+     */
+    public function discountPercentage(): int
+    {
+        if (! $this->hasDiscount() || $this->originalPrice <= 0) {
+            return 0;
+        }
+
+        return (int) round((1 - $this->finalPrice / $this->originalPrice) * 100);
+    }
 }

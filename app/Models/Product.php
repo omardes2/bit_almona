@@ -6,6 +6,8 @@ use App\Enums\ProductStatus;
 use App\Enums\SaleUnit;
 use App\Models\Concerns\Auditable;
 use App\Services\Media\ImageStorage;
+use App\Services\Pricing\ProductPriceResolver;
+use App\Services\Pricing\ResolvedPrice;
 use App\Support\ArabicText;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,10 +30,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 ])]
 class Product extends Model
 {
+    public const STORE_SORTS = [
+        'latest' => 'الأحدث',
+        'name' => 'الاسم',
+        'price_asc' => 'السعر: الأقل',
+        'price_desc' => 'السعر: الأعلى',
+    ];
+
     use Auditable, HasFactory, SoftDeletes;
 
     /** @var list<string> */
     protected array $auditExclude = ['search_text'];
+
+    private ?ResolvedPrice $resolvedPrice = null;
 
     protected function casts(): array
     {
@@ -90,6 +101,35 @@ class Product extends Model
         $query->where('status', '!=', ProductStatus::Hidden);
     }
 
+    /**
+     * Products a customer may see: not hidden, not soft deleted (global
+     * scope), and in an active category.
+     */
+    public function scopeStorefront(Builder $query): void
+    {
+        $query->where($query->qualifyColumn('status'), '!=', ProductStatus::Hidden)
+            ->whereHas('category', fn (Builder $q) => $q->where('is_active', true));
+    }
+
+    /** Available products first, then unavailable ones (hidden never reach here). */
+    public function scopeAvailableFirst(Builder $query): void
+    {
+        $query->orderByRaw('case when '.$query->qualifyColumn('status').' = ? then 0 else 1 end', [ProductStatus::Available->value]);
+    }
+
+    /**
+     * Storefront sort options: latest | name | price_asc | price_desc.
+     */
+    public function scopeSortForStore(Builder $query, ?string $sort): void
+    {
+        match ($sort) {
+            'name' => $query->orderBy('name'),
+            'price_asc' => $query->orderBy('sale_price')->orderBy('id'),
+            'price_desc' => $query->orderByDesc('sale_price')->orderBy('id'),
+            default => $query->latest('id'),
+        };
+    }
+
     public function scopeAvailable(Builder $query): void
     {
         $query->where('status', ProductStatus::Available);
@@ -123,6 +163,22 @@ class Product extends Model
             && (float) $this->stock_quantity > 0;
     }
 
+    /**
+     * The current price, always from ProductPriceResolver (memoised per instance).
+     * Eager load `activeOffer` on lists to avoid one query per product.
+     */
+    public function price(): ResolvedPrice
+    {
+        return $this->resolvedPrice ??= app(ProductPriceResolver::class)->resolve($this);
+    }
+
+    public function isVisibleInStore(): bool
+    {
+        return ! $this->trashed()
+            && $this->status !== ProductStatus::Hidden
+            && $this->category?->is_active === true;
+    }
+
     public function isLowStock(): bool
     {
         return (float) $this->stock_quantity <= (float) $this->low_stock_threshold;
@@ -141,5 +197,11 @@ class Product extends Model
     public function thumbnailUrl(): ?string
     {
         return ImageStorage::thumbnailUrl($this->main_image);
+    }
+
+    /** Storefront URL (slug based; admin URLs keep using the id). */
+    public function url(): string
+    {
+        return route('product.show', ['product' => $this->slug]);
     }
 }

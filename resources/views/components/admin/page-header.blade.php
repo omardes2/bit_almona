@@ -4,7 +4,7 @@
     <div class="flex min-w-0 items-center gap-2">
         @if ($back)
             <a href="{{ $back }}" wire:navigate class="rounded-lg p-2 text-gray-500 hover:bg-gray-200" aria-label="رجوع">
-                <x-admin.icon name="arrow-right" class="size-6" />
+                <x-icon name="arrow-right" class="size-6" />
             </a>
         @endif
         <div class="min-w-0">
