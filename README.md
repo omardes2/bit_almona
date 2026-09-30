@@ -11,12 +11,15 @@ composer install
 cp .env.example .env          # ثم عبّئ بيانات MySQL و SEED_ADMIN_*
 php artisan key:generate
 php artisan migrate --seed
+php artisan storage:link       # مطلوب لعرض الصور المرفوعة
 npm install && npm run build
 php artisan serve
 ```
 
 - الزبائن: `/login` و `/register` و `/account`
 - الإدارة: `/admin/login` و `/admin`
+  - المنتجات `/admin/products` · الأقسام `/admin/categories` · العروض `/admin/offers` · البنرات `/admin/banners`
+  - الصلاحيات: `super_admin` و `manager` يديران الكتالوج، و `staff` يرى الرئيسية فقط حاليًا.
 - المدير الأول يُنشأ من `SEED_ADMIN_PHONE` و `SEED_ADMIN_PASSWORD` في `.env`، أو عبر:
   `php artisan store:create-admin`
 

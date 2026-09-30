@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Media\ImageStorage;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,5 +20,15 @@ class ProductImage extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function url(): ?string
+    {
+        return ImageStorage::url($this->path);
+    }
+
+    public function thumbnailUrl(): ?string
+    {
+        return ImageStorage::thumbnailUrl($this->path);
     }
 }

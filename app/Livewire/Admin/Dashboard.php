@@ -3,32 +3,54 @@
 namespace App\Livewire\Admin;
 
 use App\Enums\OrderStatus;
+use App\Enums\ProductStatus;
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Offer;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-/**
- * Placeholder admin home. The full admin panel is a later phase.
- */
 #[Layout('layouts.admin')]
 #[Title('لوحة التحكم')]
 class Dashboard extends Component
 {
     public function render()
     {
+        // One aggregate query for all product counters.
+        $products = Product::query()
+            ->selectRaw('count(*) as total')
+            ->selectRaw('sum(case when status = ? then 1 else 0 end) as available', [ProductStatus::Available->value])
+            ->selectRaw('sum(case when status = ? then 1 else 0 end) as unavailable', [ProductStatus::Unavailable->value])
+            ->selectRaw('sum(case when status = ? then 1 else 0 end) as hidden', [ProductStatus::Hidden->value])
+            ->selectRaw('sum(case when stock_quantity <= low_stock_threshold then 1 else 0 end) as low_stock')
+            ->toBase()
+            ->first();
+
+        $ordersToday = Order::query()
+            ->whereBetween('created_at', [today(), today()->endOfDay()])
+            ->where('status', '!=', OrderStatus::Cancelled)
+            ->selectRaw('count(*) as count, coalesce(sum(total), 0) as sales')
+            ->toBase()
+            ->first();
+
         return view('livewire.admin.dashboard', [
-            'stats' => [
-                'الأقسام' => Category::count(),
-                'المنتجات' => Product::count(),
-                'العروض الفعالة' => Offer::running()->count(),
-                'الزبائن' => User::customers()->count(),
-                'طلبات جديدة' => Order::where('status', OrderStatus::New)->count(),
-            ],
+            'products' => $products,
+            'categoriesCount' => Category::count(),
+            'runningOffers' => Offer::running()->whereHas('product')->count(),
+            'runningBanners' => Banner::running()->count(),
+            'ordersToday' => (int) $ordersToday->count,
+            'salesToday' => (string) $ordersToday->sales,
+            'lowStockProducts' => Product::query()
+                ->lowStock()
+                ->where('status', '!=', ProductStatus::Hidden)
+                ->orderBy('stock_quantity')
+                ->limit(6)
+                ->get(['id', 'name', 'sku', 'main_image', 'stock_quantity', 'low_stock_threshold', 'unit']),
+            'canManageCatalog' => Gate::allows('manage-catalog'),
         ]);
     }
 }

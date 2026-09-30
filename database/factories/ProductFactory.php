@@ -29,7 +29,9 @@ class ProductFactory extends Factory
             'min_order_quantity' => 1,
             'quantity_step' => 1,
             'unit' => SaleUnit::Piece,
+            'low_stock_threshold' => 5,
             'status' => ProductStatus::Available,
+            'is_featured' => false,
         ];
     }
 

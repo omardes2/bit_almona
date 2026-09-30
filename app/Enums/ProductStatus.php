@@ -17,6 +17,15 @@ enum ProductStatus: string
         };
     }
 
+    public function badgeClasses(): string
+    {
+        return match ($this) {
+            self::Available => 'bg-green-100 text-green-800',
+            self::Unavailable => 'bg-amber-100 text-amber-800',
+            self::Hidden => 'bg-gray-200 text-gray-700',
+        };
+    }
+
     /**
      * Whether a product with this status is shown in the storefront.
      */

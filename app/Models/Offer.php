@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\Auditable;
+use App\Models\Concerns\HasSchedule;
+use App\Services\Media\ImageStorage;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class Offer extends Model
 {
-    use HasFactory;
+    use Auditable, HasFactory, HasSchedule;
 
     protected function casts(): array
     {
@@ -30,26 +33,7 @@ class Offer extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class);
-    }
-
-    /**
-     * Offers that are active and inside their date window right now.
-     * Expired offers stop applying immediately, even before the scheduled
-     * `offers:deactivate-expired` command flips their is_active flag.
-     */
-    public function scopeRunning(Builder $query): void
-    {
-        $now = now();
-
-        $query->where($query->qualifyColumn('is_active'), true)
-            ->where(fn (Builder $q) => $q->whereNull($q->qualifyColumn('starts_at'))->orWhere($q->qualifyColumn('starts_at'), '<=', $now))
-            ->where(fn (Builder $q) => $q->whereNull($q->qualifyColumn('ends_at'))->orWhere($q->qualifyColumn('ends_at'), '>', $now));
-    }
-
-    public function scopeExpired(Builder $query): void
-    {
-        $query->whereNotNull('ends_at')->where('ends_at', '<=', now());
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     public function scopeOrdered(Builder $query): void
@@ -57,13 +41,17 @@ class Offer extends Model
         $query->orderBy('sort_order')->orderByDesc('id');
     }
 
-    public function isRunning(): bool
+    /**
+     * The offer image if set, otherwise the product's main image.
+     */
+    public function thumbnailUrl(): ?string
     {
-        return $this->is_active
-            && ($this->starts_at === null || $this->starts_at->lte(now()))
-            && ($this->ends_at === null || $this->ends_at->gt(now()));
+        return ImageStorage::thumbnailUrl($this->image ?? $this->product?->main_image);
     }
 
+    /**
+     * Discount percentage, always calculated on the server.
+     */
     public function discountPercentage(): int
     {
         if ((float) $this->original_price <= 0) {
